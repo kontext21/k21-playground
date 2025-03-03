@@ -7,6 +7,9 @@ It's hosted at [playground.kontext21.com/](https://playground.kontext21.com/) or
 
 It's main purpose is to be used for quick experiments with the k21-processor and serve as a sample app.
 
+![image](https://github.com/user-attachments/assets/8b13db47-a71d-48a4-92bc-2c98e052c767)
+
+
 ## Features planned
 
 - [X] Add a way to upload videos 
