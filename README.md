@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is Kontext21 Playground. It's a simple Next.js app that allows you to 
+1. Upload a user screen session (recorded as MP4)
+2. Send it to the k21-processor in the cloud
+3. Display JSON response.
 
-## Getting Started
+It's hosted at [playground.kontext21.com/](https://playground.kontext21.com/) or you can run it locally.
+
+It's main purpose is to be used for quick experiments with the k21-processor and serve as a sample app.
+
+## Features planned
+
+- [X] Add a way to upload videos 
+- [ ] PNG Upload
+- [ ] Webcaputre directly in Browser
+- [ ] Switch to a different processor
+- [ ] Nicer UI for the JSON response
+- [ ] Add [docker deployment](https://github.com/vercel/next.js/tree/canary/examples/with-docker) 
+
+## Getting Started Locally
 
 First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is a [Next.js](https://nextjs.org) project.
