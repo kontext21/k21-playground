@@ -7,13 +7,13 @@ export async function uploadVideo(formData: FormData) {
     // Debug: Log form data contents
     console.log('FormData entries:', Array.from(formData.entries()))
     
-    const file = formData.get('video') // Changed from 'file' to 'video' - this name should match your form input name
+    const file = formData.get('video')
     if (!file) {
       throw new Error('No file provided')
     }
 
     // Convert file to base64
-    const buffer = await file.arrayBuffer()
+    const buffer = await (file as Blob).arrayBuffer()
     const base64Data = Buffer.from(buffer).toString('base64')
 
     const response = await fetch("https://k21-server-468449125003.europe-west10.run.app/process-video-base64", {
