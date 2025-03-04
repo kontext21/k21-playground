@@ -62,8 +62,25 @@ export default function VideoUploader() {
     <div className="container max-w-3xl py-10">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">MP4 Video Uploader</CardTitle>
-          <CardDescription>Upload an MP4 video file and see the JSON response</CardDescription>
+          <CardTitle className="text-2xl">Kontext21 Playground</CardTitle>
+          <CardDescription>
+            Upload an MP4 video file and see the JSON response.{" "}
+            <a 
+              href="https://github.com/kontext21/k21-playground" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-primary hover:underline"
+            >
+              View source code on GitHub
+            </a>
+            {" | "}
+            <a 
+              href="/streamlit" 
+              className="text-primary hover:underline"
+            >
+              Try Streamlit Demo
+            </a>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
