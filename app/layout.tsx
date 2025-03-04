@@ -6,8 +6,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "MP4 Video Uploader",
-  description: "Upload MP4 videos and view JSON responses",
+  title: "K21 Playground",
+  description: "Kontext21 Playground to upload MP4 videos of user screen sessions and get JSON responses",
 }
 
 export default function RootLayout({
