@@ -62,8 +62,8 @@ export default function VideoUploader() {
     <div className="container max-w-3xl py-10">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">MP4 Video Uploader</CardTitle>
-          <CardDescription>Upload an MP4 video file and see the JSON response <a 
+          <CardTitle className="text-2xl">Kontext21 Playground</CardTitle>
+          <CardDescription>Upload an MP4 video file and see the JSON response of OCR of each frame. <a
               href="https://github.com/kontext21/k21-playground" 
               target="_blank" 
               rel="noreferrer"
