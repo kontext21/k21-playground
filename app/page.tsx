@@ -10,10 +10,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadVideo } from "@/app/actions"
 
+interface ApiResponse {
+  base64_data: string;
+  status: string;
+  message?: string;
+}
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [response, setResponse] = useState<any>(null)
+  const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
