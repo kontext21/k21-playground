@@ -64,7 +64,15 @@ export default function VideoUploader() {
         <CardHeader>
           <CardTitle className="text-2xl">Kontext21 Playground</CardTitle>
           <CardDescription>
-            Upload an MP4 video file and see the JSON response.{" "}
+            Upload an MP4 video file and see the JSON response <a 
+              href="https://github.com/kontext21/k21-playground" 
+              target="_blank" 
+              rel="noreferrer"
+              className="text-primary hover:underline"
+            >
+              View source code on GitHub
+            </a>
+          .{" "}
             <a 
               href="https://github.com/kontext21/k21-playground" 
               target="_blank" 
