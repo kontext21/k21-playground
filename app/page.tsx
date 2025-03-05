@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadVideo } from "@/app/actions"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import exampleResponse1Json from "@/test/example-ouput-small.json"
+import exampleResponse2Json from "@/test/example-output-mid.json"
 
 interface ApiResponse {
   base64_data?: string;
@@ -21,6 +23,9 @@ interface ApiResponse {
     time_id?: string;
   }>;
 }
+
+const exampleResponse1 = exampleResponse1Json as ApiResponse;
+const exampleResponse2 = exampleResponse2Json as ApiResponse;
 
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
@@ -99,6 +104,18 @@ export default function VideoUploader() {
     }
   }
 
+  const loadExampleVideo = (exampleNumber: number) => {
+    setFile(null);
+    setIsUploading(false);
+    setError(null);
+    
+    if (exampleNumber === 1) {
+      setResponse(exampleResponse1);
+    } else if (exampleNumber === 2) {
+      setResponse(exampleResponse2);
+    }
+  };
+
   return (
     <div className="container max-w-3xl py-10">
       <Card>
@@ -141,7 +158,24 @@ export default function VideoUploader() {
               )}
               {error && <p className="text-sm text-destructive">{error}</p>}
               <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
+              
+              <div className="mt-4 flex gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => loadExampleVideo(1)}
+                >
+                  Example Video 1
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => loadExampleVideo(2)}
+                >
+                  Example Video 2
+                </Button>
               </div>
+            </div>
           </form>
 
           {response && (
