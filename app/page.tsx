@@ -2,16 +2,17 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { useState, useRef } from "react"
+import { FileUp, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { uploadVideo } from "@/app/actions"
+import { uploadVideo, uploadBase64 } from "@/app/actions"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import exampleResponse1Json from "@/test/example-ouput-small.json"
 import exampleResponse2Json from "@/test/example-output-mid.json"
+import ScreenRecorder from "@/components/ScreenRecorder"
 
 
 interface ApiResponse {
@@ -31,6 +32,14 @@ export default function VideoUploader() {
   const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
+  
+  // Ref to the element you want to record
+  const appRef = useRef<HTMLDivElement>(null)
+
+  // Add a state for the base64 video data
+  const [videoBase64, setVideoBase64] = useState<string | null>(null)
+  // Add a state for base64 upload
+  const [isUploadingBase64, setIsUploadingBase64] = useState(false)
   const [selectedSource, setSelectedSource] = useState<string>("excel")
   const [pendingExample, setPendingExample] = useState<ApiResponse | null>(null)
 
@@ -138,8 +147,44 @@ export default function VideoUploader() {
     }
   };
 
+  // Add a handler for when a recording is completed
+  const handleRecordedFile = (recordedFile: File) => {
+    setFile(recordedFile)
+    // You can also automatically process the file if needed
+    // e.g., automatically submit it for processing
+  }
+
+  // Add a handler for when base64 is generated
+  const handleBase64Generated = (base64: string) => {
+    setVideoBase64(base64);
+    console.log("Video base64 generated, length:", base64.length);
+    // You can use this base64 string for API calls or other purposes
+  };
+
+  // Add a function to handle base64 upload
+  const handleUploadBase64 = async () => {
+    if (!videoBase64) {
+      setError("No recorded video available")
+      return
+    }
+
+    setIsUploadingBase64(true)
+    setError(null)
+
+    try {
+      // Assuming you have an uploadBase64 function in your actions
+      // You'll need to implement this function in your actions file
+      const result = await uploadBase64(videoBase64)
+      setResponse(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred during upload")
+    } finally {
+      setIsUploadingBase64(false)
+    }
+  }
+
   return (
-    <div className="container max-w-full px-4 py-10">
+    <div ref={appRef} className="container max-w-full px-4 py-10">
       <h1 className="text-4xl font-bold text-center mb-8">Kontext21 Playground</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
         <Card className="min-h-[600px]">
@@ -195,6 +240,39 @@ export default function VideoUploader() {
                       />
                       <Label htmlFor="screen" className="text-muted-foreground">Share your screen (coming soon)</Label>
                     </div>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+                
+                {/* Video Recording Section */}
+                <ScreenRecorder 
+                  onFileRecorded={handleRecordedFile} 
+                  onBase64Generated={handleBase64Generated} 
+                />
+                
+                {videoBase64 && (
+                  <Button
+                    type="button"
+                    onClick={handleUploadBase64}
+                    disabled={isUploadingBase64}
+                    className="w-full mt-2 bg-black text-white hover:bg-gray-800"
+                  >
+                    {isUploadingBase64 ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      "Upload Recorded Video"
+                    )}
+                  </Button>
+                )}
                     <div className="flex items-center space-x-2">
                       <input
                         type="radio"
