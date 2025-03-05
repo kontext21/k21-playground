@@ -145,14 +145,14 @@ export default function VideoUploader() {
         <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
-            <CardDescription>Select source material to capture from. 
+            <CardDescription>Context is build from source material. 
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="preset" className="mb-2 block">Choose your source</Label>
+                  <Label htmlFor="preset" className="mb-2 block">Choose your source:</Label>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <input
@@ -167,7 +167,7 @@ export default function VideoUploader() {
                         }}
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
-                      <Label htmlFor="excel">Excel Spreadsheet</Label>
+                      <Label htmlFor="excel">Sample 1: User session with Excel spreadsheet (1 frame) </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -181,7 +181,7 @@ export default function VideoUploader() {
                         }}
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
-                      <Label htmlFor="powerpoint">PowerPoint Slide</Label>
+                      <Label htmlFor="powerpoint">Sample 2: User session with PowerPoint slide (4 frames)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
