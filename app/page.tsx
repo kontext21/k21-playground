@@ -5,11 +5,14 @@ import type React from "react"
 import { useState } from "react"
 import { FileUp, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadVideo } from "@/app/actions"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import exampleResponse1Json from "@/test/example-ouput-small.json"
+import exampleResponse2Json from "@/test/example-output-mid.json"
+
 
 interface ApiResponse {
   base64_data?: string;
@@ -99,6 +102,21 @@ export default function VideoUploader() {
     }
   }
 
+  const exampleResponse1 = exampleResponse1Json as ApiResponse;
+  const exampleResponse2 = exampleResponse2Json as ApiResponse;
+
+  const loadExampleVideo = (exampleNumber: number) => {
+    setFile(null);
+    setIsUploading(false);
+    setError(null);
+
+    if (exampleNumber === 1) {
+      setResponse(exampleResponse1);
+    } else if (exampleNumber === 2) {
+      setResponse(exampleResponse2);
+    }
+  };
+
   return (
     <div className="container max-w-7xl py-10">
       <h1 className="text-4xl font-bold text-center mb-8">Kontext21 Playground</h1>
@@ -111,36 +129,73 @@ export default function VideoUploader() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="video">Select MP4 Video</Label>
-                <div className="flex items-center gap-4">
-                  <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
-                  <Button type="submit" disabled={!file || isUploading} className="min-w-[120px]">
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Uploading
-                      </>
-                    ) : (
-                      <>
-                        <FileUp className="mr-2 h-4 w-4" />
-                        Upload
-                      </>
-                    )}
-                  </Button>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="preset" className="mb-2 block">Choose from examples</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        // Logic to select preset example 1
+                        loadExampleVideo(1)
+                        // You would need to implement the actual loading of preset data
+                      }}
+                    >
+                      Example 1
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        // Logic to select preset example 2
+                        loadExampleVideo(2)
+                        // You would need to implement the actual loading of preset data
+                      }}
+                    >
+                      Example 2
+                    </Button>
+                  </div>
                 </div>
-                {file && (
-                  <p className="text-sm text-muted-foreground">
-                    Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
-                  </p>
-                )}
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
+                
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="video">Select MP4 Video</Label>
+                  <div className="flex items-center gap-4">
+                    <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
+                    <Button type="submit" disabled={!file || isUploading} className="min-w-[120px]">
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading
+                        </>
+                      ) : (
+                        <>
+                          <FileUp className="mr-2 h-4 w-4" />
+                          Upload
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {file && (
+                    <p className="text-sm text-muted-foreground">
+                      Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                    </p>
+                  )}
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
+                </div>
+              </div>
             </form>
-
           </CardContent>
-        
         </Card>
         <Card>
           <CardHeader>
