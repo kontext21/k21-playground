@@ -28,16 +28,8 @@ interface ApiResponse {
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [response, setResponse] = useState<ApiResponse | null>({
-    message: "Successfully processed 1 video frames",
-    success: true,
-    result: [
-      {
-        ocr_text: "a Ome: A®@ 'Fcomments File File File File Home Insert Page Layout Formulas Data Review View Developer Help @® vrtoap rae signin | x Fa ve few) =VLOoKUP(F3,B1:C4, 2, FALSE) y A 8 c D E F H A k L M N ° e a R s T u v w x y ZA BCD 1 2 id name age 3 1 Karl 43 id 32 4 2 Martha 56 name N/A 5 3 Sally 13 6 jon 7 8 9 1 1 1 1 1 1 1 1 1 i > Ed @) -—_+_+ 10 0930 a 9 MO rpgi212 Sheet! | @ Ready EB FY Accessibity Good to go",
-        time_id: "2025-03-05 12:35:19"
-      }
-    ]
-  })
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
 
@@ -109,6 +101,7 @@ export default function VideoUploader() {
     setFile(null);
     setIsUploading(false);
     setError(null);
+    setWordFrequencies(null);
 
     if (exampleNumber === 1) {
       setResponse(exampleResponse1);
@@ -117,11 +110,35 @@ export default function VideoUploader() {
     }
   };
 
+  const processVideo = async () => {
+    setIsProcessing(true);
+    try {
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // For example videos, we can just use the example responses
+      if (!file) {
+        // If no file is uploaded, we're using an example
+        // The response is already set by loadExampleVideo
+        setIsProcessing(false);
+        return;
+      }
+      
+      // For actual uploaded files, we would process them here
+      // This is already handled in handleSubmit, so we don't need to duplicate it
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred during processing");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
-    <div className="container max-w-7xl py-10">
+    <div className="container max-w-full px-4 py-10">
       <h1 className="text-4xl font-bold text-center mb-8">Kontext21 Playground</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
+        <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription>Select source material to capture from. 
@@ -136,24 +153,18 @@ export default function VideoUploader() {
                     <Button 
                       type="button" 
                       variant="outline"
-                      onClick={() => {
-                        // Logic to select preset example 1
-                        loadExampleVideo(1)
-                        // You would need to implement the actual loading of preset data
-                      }}
+                      className="bg-black text-white hover:bg-gray-800"
+                      onClick={() => loadExampleVideo(1)}
                     >
-                      Example 1
+                      Excel Spreadsheet
                     </Button>
                     <Button 
                       type="button" 
                       variant="outline"
-                      onClick={() => {
-                        // Logic to select preset example 2
-                        loadExampleVideo(2)
-                        // You would need to implement the actual loading of preset data
-                      }}
+                      className="bg-black text-white hover:bg-gray-800"
+                      onClick={() => loadExampleVideo(2)}
                     >
-                      Example 2
+                      PowerPoint Slide
                     </Button>
                   </div>
                 </div>
@@ -171,7 +182,11 @@ export default function VideoUploader() {
                   <Label htmlFor="video">Select MP4 Video</Label>
                   <div className="flex items-center gap-4">
                     <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
-                    <Button type="submit" disabled={!file || isUploading} className="min-w-[120px]">
+                    <Button 
+                      type="submit" 
+                      disabled={!file || isUploading} 
+                      className="min-w-[120px] bg-black text-white hover:bg-gray-800"
+                    >
                       {isUploading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -197,27 +212,48 @@ export default function VideoUploader() {
             </form>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Process</CardTitle>
             <CardDescription>
-     
+              Extract text from your video frames
             </CardDescription>
           </CardHeader>
-          <CardContent>
-          {response && (
-              <div className="mt-8 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Response:</h3>
-                </div>
-                <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
-                  <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
-                </div>
+          <CardContent className="h-full overflow-auto">
+            <div className="flex flex-col h-full">
+              <div className="mb-4">
+                <Button 
+                  onClick={processVideo}
+                  disabled={isProcessing || (!file && !response)}
+                  className="w-full bg-black text-white hover:bg-gray-800"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Process Video"
+                  )}
+                </Button>
               </div>
-            )}
+              
+              {response && (
+                <div className="mt-4 space-y-4 flex-grow">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">Response:</h3>
+                  </div>
+                  <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
+                    <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Consume</CardTitle>
             <CardDescription>
@@ -227,7 +263,7 @@ export default function VideoUploader() {
                   <div className="flex justify-end">
                     <Button
                       onClick={calculateWordFrequencies}
-                      className="mb-2"
+                      className="mb-2 bg-black text-white hover:bg-gray-800"
                     >
                       Analyze Word Frequency
                     </Button>
@@ -267,11 +303,11 @@ export default function VideoUploader() {
             )}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-full">
           </CardContent>
         </Card>
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-6">
         <a
             href="https://github.com/kontext21/k21-playground" 
             target="_blank" 
@@ -283,9 +319,11 @@ export default function VideoUploader() {
         {response && (
                 <Button
                   variant="outline"
+                  className="bg-black text-white hover:bg-gray-800"
                   onClick={() => {
                     setFile(null)
                     setResponse(null)
+                    setWordFrequencies(null)
                   }}
                 >
                   Reset
