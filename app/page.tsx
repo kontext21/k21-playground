@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useRef } from "react"
-import { FileUp, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -128,6 +128,10 @@ export default function VideoUploader() {
         // If we have a pending example, use that as the response
         setResponse(pendingExample);
         setPendingExample(null);
+      } else if (selectedSource === "screen" && videoBase64) {
+        // For screen recordings, use the base64 data if available
+        const result = await uploadBase64(videoBase64);
+        setResponse(result);
       } else if (file) {
         // Handle file upload and processing
         const formData = new FormData()
@@ -234,45 +238,13 @@ export default function VideoUploader() {
                         id="screen"
                         name="source"
                         value="screen"
-                        disabled
                         onChange={() => setSelectedSource("screen")}
-                        className="h-4 w-4 border-gray-300 text-muted-foreground focus:ring-primary"
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
-                      <Label htmlFor="screen" className="text-muted-foreground">Share your screen (coming soon)</Label>
+                      <Label htmlFor="screen">Share your screen</Label>
                     </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
-                  </div>
-                </div>
-                
-                {/* Video Recording Section */}
-                <ScreenRecorder 
-                  onFileRecorded={handleRecordedFile} 
-                  onBase64Generated={handleBase64Generated} 
-                />
-                
-                {videoBase64 && (
-                  <Button
-                    type="button"
-                    onClick={handleUploadBase64}
-                    disabled={isUploadingBase64}
-                    className="w-full mt-2 bg-black text-white hover:bg-gray-800"
-                  >
-                    {isUploadingBase64 ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      "Upload Recorded Video"
-                    )}
-                  </Button>
-                )}
+
+              
                     <div className="flex items-center space-x-2">
                       <input
                         type="radio"
@@ -290,6 +262,14 @@ export default function VideoUploader() {
                     </div>
                   </div>
                 </div>
+                                
+                {/* Video Recording Section */}
+                {selectedSource === "screen" && (
+                  <ScreenRecorder 
+                    onFileRecorded={handleRecordedFile} 
+                    onBase64Generated={handleBase64Generated} 
+                  />
+                )}
                 
                 {selectedSource === "upload" && (
                   <div className="space-y-2">
@@ -306,10 +286,10 @@ export default function VideoUploader() {
                         Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                       </p>
                     )}
-                    {error && <p className="text-sm text-destructive">{error}</p>}
                     <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
                   </div>
                 )}
+                {error && <p className="text-sm text-destructive">{error}</p>}
               </div>
             </form>
           </CardContent>
