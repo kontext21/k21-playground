@@ -11,16 +11,29 @@ import { Label } from "@/components/ui/label"
 import { uploadVideo } from "@/app/actions"
 
 interface ApiResponse {
-  base64_data: string;
-  status: string;
+  base64_data?: string;
+  status?: string;
   message?: string;
-  result?: Array<{ ocr_text: string }>;
+  success?: boolean;
+  result?: Array<{ 
+    ocr_text: string;
+    time_id?: string;
+  }>;
 }
 
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [response, setResponse] = useState<ApiResponse | null>(null)
+  const [response, setResponse] = useState<ApiResponse | null>({
+    message: "Successfully processed 1 video frames",
+    success: true,
+    result: [
+      {
+        ocr_text: "a Ome: A®@ 'Fcomments File File File File Home Insert Page Layout Formulas Data Review View Developer Help @® vrtoap rae signin | x Fa ve few) =VLOoKUP(F3,B1:C4, 2, FALSE) y A 8 c D E F H A k L M N ° e a R s T u v w x y ZA BCD 1 2 id name age 3 1 Karl 43 id 32 4 2 Martha 56 name N/A 5 3 Sally 13 6 jon 7 8 9 1 1 1 1 1 1 1 1 1 i > Ed @) -—_+_+ 10 0930 a 9 MO rpgi212 Sheet! | @ Ready EB FY Accessibity Good to go",
+        time_id: "2025-03-05 12:35:19"
+      }
+    ]
+  })
   const [error, setError] = useState<string | null>(null)
   const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
 
