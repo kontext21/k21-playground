@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { uploadVideo } from "@/app/actions"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
 interface ApiResponse {
   base64_data?: string;
@@ -139,7 +140,8 @@ export default function VideoUploader() {
                 </p>
               )}
               {error && <p className="text-sm text-destructive">{error}</p>}
-            </div>
+              <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
+              </div>
           </form>
 
           {response && (
@@ -162,21 +164,38 @@ export default function VideoUploader() {
               )}
               {wordFrequencies && (
                 <div className="mb-4 p-4 bg-muted rounded-md">
-                  <h4 className="font-medium mb-2">Top 10 Most Frequent Words:</h4>
-                  <ul className="space-y-1">
-                    {wordFrequencies.map(([word, count], index) => (
-                      <li key={word} className="text-sm">
-                        {index + 1}. {word}: {count} occurrences
-                      </li>
-                    ))}
-                  </ul>
+                  <h4 className="font-medium mb-4">Top 10 Most Frequent Words:</h4>
+                  <div className="h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={wordFrequencies.map(([word, count]) => ({
+                          word,
+                          count
+                        }))}
+                        layout="vertical"
+                      >
+                        <XAxis type="number" />
+                        <YAxis 
+                          type="category" 
+                          dataKey="word" 
+                          width={100}
+                          tick={{ fontSize: 12 }}
+                        />
+                        <Tooltip />
+                        <Bar 
+                          dataKey="count" 
+                          fill="hsl(var(--primary))"
+                          radius={[0, 4, 4, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
+        <CardFooter className="flex justify-end">
           {response && (
             <Button
               variant="outline"
