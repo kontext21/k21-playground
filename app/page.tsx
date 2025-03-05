@@ -14,6 +14,7 @@ interface ApiResponse {
   base64_data: string;
   status: string;
   message?: string;
+  result?: Array<{ ocr_text: string }>;
 }
 
 export default function VideoUploader() {
@@ -21,6 +22,32 @@ export default function VideoUploader() {
   const [isUploading, setIsUploading] = useState(false)
   const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
+
+  const calculateWordFrequencies = () => {
+    if (!response?.result) return;
+    
+    // Combine all OCR text and split into words
+    const allText = response.result
+      .map(frame => frame.ocr_text || '')
+      .join(' ')
+      .toLowerCase();
+    
+    const words = allText.match(/\b\w+\b/g) || [];
+    
+    // Count word frequencies
+    const frequencies = words.reduce((acc: { [key: string]: number }, word) => {
+      acc[word] = (acc[word] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Convert to array and sort by frequency
+    const sortedFrequencies = Object.entries(frequencies)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10);
+    
+    setWordFrequencies(sortedFrequencies);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -104,10 +131,34 @@ export default function VideoUploader() {
 
           {response && (
             <div className="mt-8 space-y-4">
-              <h3 className="text-lg font-medium">Response:</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Response:</h3>
+              </div>
               <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
                 <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
               </div>
+              {response.result && (
+                <div className="flex justify-end">
+                  <Button
+                    onClick={calculateWordFrequencies}
+                    className="mb-2"
+                  >
+                    Analyze Word Frequency
+                  </Button>
+                </div>
+              )}
+              {wordFrequencies && (
+                <div className="mb-4 p-4 bg-muted rounded-md">
+                  <h4 className="font-medium mb-2">Top 10 Most Frequent Words:</h4>
+                  <ul className="space-y-1">
+                    {wordFrequencies.map(([word, count], index) => (
+                      <li key={word} className="text-sm">
+                        {index + 1}. {word}: {count} occurrences
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
