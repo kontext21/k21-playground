@@ -19,7 +19,6 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
   const [error, setError] = useState<string | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null)
-  const [videoBase64, setVideoBase64] = useState<string | null>(null)
   
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -70,7 +69,6 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
     setError(null)
     setDownloadUrl(null)
     setRecordedVideoUrl(null)
-    setVideoBase64(null)
     
     try {
       // Request screen capture, preferring the current tab
@@ -155,7 +153,6 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
           // Convert to base64
           try {
             const base64 = await blobToBase64(blob);
-            setVideoBase64(base64);
             console.log("base64 of the video", {base64});
             
             // Call the callback if provided
