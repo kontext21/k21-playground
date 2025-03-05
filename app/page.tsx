@@ -26,22 +26,22 @@ interface ApiResponse {
   }>;
 }
 
+type VideoSource = {
+  type: "excel" | "powerpoint" | "screen" | "upload";
+  example?: ApiResponse | null;
+}
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
+  const [videoBase64, setVideoBase64] = useState<string | null>(null)
+  const [source, setSource] = useState<VideoSource>({ type: "excel", example: exampleResponse1Json as ApiResponse })
   
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null)
-
-  // Add a state for the base64 video data
-  const [videoBase64, setVideoBase64] = useState<string | null>(null)
-  // Add a state for base64 upload
-  const [isUploadingBase64, setIsUploadingBase64] = useState(false)
-  const [selectedSource, setSelectedSource] = useState<string>("excel")
-  const [pendingExample, setPendingExample] = useState<ApiResponse | null>(null)
 
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
@@ -101,22 +101,6 @@ export default function VideoUploader() {
     }
   }
 
-  const exampleResponse1 = exampleResponse1Json as ApiResponse;
-  const exampleResponse2 = exampleResponse2Json as ApiResponse;
-
-  const loadExampleVideo = (exampleNumber: number) => {
-    setFile(null);
-    setError(null);
-    setWordFrequencies(null);
-    setResponse(null);
-
-    if (exampleNumber === 1) {
-      setPendingExample(exampleResponse1);
-    } else if (exampleNumber === 2) {
-      setPendingExample(exampleResponse2);
-    }
-  };
-
   const processVideo = async () => {
     setIsProcessing(true);
     setResponse(null);
@@ -124,11 +108,10 @@ export default function VideoUploader() {
       // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (pendingExample) {
-        // If we have a pending example, use that as the response
-        setResponse(pendingExample);
-        setPendingExample(null);
-      } else if (selectedSource === "screen" && videoBase64) {
+      if (source.example) {
+        // If we have an example, use that as the response
+        setResponse(source.example);
+      } else if (source.type === "screen" && videoBase64) {
         // For screen recordings, use the base64 data if available
         const result = await uploadBase64(videoBase64);
         setResponse(result);
@@ -140,7 +123,7 @@ export default function VideoUploader() {
         const result = await uploadVideo(formData)
         setResponse(result)
       } else {
-        // If no file and no pending example, show error
+        // If no file and no example, show error
         setError("No content to process");
         return;
       }
@@ -165,27 +148,6 @@ export default function VideoUploader() {
     // You can use this base64 string for API calls or other purposes
   };
 
-  // Add a function to handle base64 upload
-  const handleUploadBase64 = async () => {
-    if (!videoBase64) {
-      setError("No recorded video available")
-      return
-    }
-
-    setIsUploadingBase64(true)
-    setError(null)
-
-    try {
-      // Assuming you have an uploadBase64 function in your actions
-      // You'll need to implement this function in your actions file
-      const result = await uploadBase64(videoBase64)
-      setResponse(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred during upload")
-    } finally {
-      setIsUploadingBase64(false)
-    }
-  }
 
   return (
     <div ref={appRef} className="container max-w-full px-4 py-10">
@@ -211,12 +173,11 @@ export default function VideoUploader() {
                         value="excel"
                         defaultChecked
                         onChange={() => {
-                          setSelectedSource("excel");
-                          loadExampleVideo(1);
+                          setSource({ type: "excel", example: exampleResponse1Json as ApiResponse });
                         }}
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
-                      <Label htmlFor="excel">Sample 1: User session with Excel spreadsheet (1 frame) </Label>
+                      <Label htmlFor="excel">Sample 1: User session with Excel spreadsheet</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -225,12 +186,11 @@ export default function VideoUploader() {
                         name="source"
                         value="powerpoint"
                         onChange={() => {
-                          setSelectedSource("powerpoint");
-                          loadExampleVideo(2);
+                          setSource({ type: "powerpoint", example: exampleResponse2Json as ApiResponse });
                         }}
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
-                      <Label htmlFor="powerpoint">Sample 2: User session with PowerPoint slide (4 frames)</Label>
+                      <Label htmlFor="powerpoint">Sample 2: User session with PowerPoint slide</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
@@ -238,13 +198,13 @@ export default function VideoUploader() {
                         id="screen"
                         name="source"
                         value="screen"
-                        onChange={() => setSelectedSource("screen")}
+                        onChange={() => {
+                          setSource({ type: "screen", example: null });
+                        }}
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
                       <Label htmlFor="screen">Share your screen</Label>
                     </div>
-
-              
                     <div className="flex items-center space-x-2">
                       <input
                         type="radio"
@@ -252,7 +212,7 @@ export default function VideoUploader() {
                         name="source"
                         value="upload"
                         onChange={() => {
-                          setSelectedSource("upload");
+                          setSource({ type: "upload", example: null });
                           setFile(null);
                           setResponse(null);
                         }}
@@ -264,14 +224,14 @@ export default function VideoUploader() {
                 </div>
                                 
                 {/* Video Recording Section */}
-                {selectedSource === "screen" && (
+                {source.type === "screen" && (
                   <ScreenRecorder 
                     onFileRecorded={handleRecordedFile} 
                     onBase64Generated={handleBase64Generated} 
                   />
                 )}
                 
-                {selectedSource === "upload" && (
+                {source.type === "upload" && (
                   <div className="space-y-2">
                     <Label htmlFor="video">Select MP4 Video</Label>
                     <Input 
@@ -289,7 +249,6 @@ export default function VideoUploader() {
                     <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
                   </div>
                 )}
-                {error && <p className="text-sm text-destructive">{error}</p>}
               </div>
             </form>
           </CardContent>
@@ -307,7 +266,7 @@ export default function VideoUploader() {
               <div className="mb-4">
                 <Button 
                   onClick={processVideo}
-                  disabled={isProcessing || (!file && !pendingExample)}
+                  disabled={isProcessing || (!file && !source.example && !videoBase64)}
                 >
                   {isProcessing ? (
                     <>
@@ -319,6 +278,7 @@ export default function VideoUploader() {
                   )}
                 </Button>
               </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
               
               {response && (
                 <div className="mt-4 space-y-4 flex-grow">

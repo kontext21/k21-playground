@@ -156,6 +156,7 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
           try {
             const base64 = await blobToBase64(blob);
             setVideoBase64(base64);
+            console.log("base64 of the video", {base64});
             
             // Call the callback if provided
             if (onBase64Generated) {
@@ -219,56 +220,44 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
         )}
       </div>
       
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {!isRecording ? (
           <Button 
             type="button"
             onClick={startRecording}
-            className="flex-1 bg-black text-white hover:bg-gray-800"
+            className="bg-black text-white hover:bg-gray-800"
             disabled={isRecording}
           >
             <Video className="mr-2 h-4 w-4" />
-            Start Screen Recording
+            Start Recording
           </Button>
         ) : (
           <Button 
             type="button"
             onClick={stopRecording}
-            className="flex-1 bg-red-600 text-white hover:bg-red-700"
+            className="bg-red-600 text-white hover:bg-red-700"
           >
             <StopCircle className="mr-2 h-4 w-4" />
             Stop Recording
           </Button>
         )}
+
+        {downloadUrl && (
+          <Button 
+            type="button"
+            variant="outline"
+            onClick={downloadRecording}
+          >
+            <FileDown className="mr-2 h-4 w-4" />
+            Download Recording
+          </Button>
+        )}
       </div>
-      
-      {downloadUrl && (
-        <Button 
-          type="button"
-          onClick={downloadRecording}
-          className="w-full mt-2 bg-green-600 text-white hover:bg-green-700"
-        >
-          <FileDown className="mr-2 h-4 w-4" />
-          Download Recording
-        </Button>
-      )}
       
       {error && (
         <p className="text-sm text-destructive mt-2">{error}</p>
       )}
-      
-      {videoBase64 && (
-        <div className="mt-4">
-          <details>
-            <summary className="cursor-pointer text-sm font-medium">View Base64 Data</summary>
-            <div className="mt-2 p-2 bg-muted rounded-md">
-              <p className="text-xs break-all max-h-32 overflow-auto">
-                {videoBase64.substring(0, 100)}...
-              </p>
-            </div>
-          </details>
-        </div>
-      )}
+
     </div>
   )
 } 
