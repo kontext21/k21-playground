@@ -100,115 +100,143 @@ export default function VideoUploader() {
   }
 
   return (
-    <div className="container max-w-3xl py-10">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Kontext21 Playground</CardTitle>
-          <CardDescription>Upload an MP4 video file and see the JSON response of OCR of each frame. <a
-              href="https://github.com/kontext21/k21-playground" 
-              target="_blank" 
-              rel="noreferrer"
-              className="text-primary hover:underline"
-            >
-              View source code on GitHub
-            </a>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="video">Select MP4 Video</Label>
-              <div className="flex items-center gap-4">
-                <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
-                <Button type="submit" disabled={!file || isUploading} className="min-w-[120px]">
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading
-                    </>
-                  ) : (
-                    <>
-                      <FileUp className="mr-2 h-4 w-4" />
-                      Upload
-                    </>
-                  )}
-                </Button>
-              </div>
-              {file && (
-                <p className="text-sm text-muted-foreground">
-                  Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
-                </p>
-              )}
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
-              </div>
-          </form>
-
-          {response && (
-            <div className="mt-8 space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Response:</h3>
-              </div>
-              <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
-                <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
-              </div>
-              {response.result && (
-                <div className="flex justify-end">
-                  <Button
-                    onClick={calculateWordFrequencies}
-                    className="mb-2"
-                  >
-                    Analyze Word Frequency
+    <div className="container max-w-7xl py-10">
+      <h1 className="text-4xl font-bold text-center mb-8">Kontext21 Playground</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Capture</CardTitle>
+            <CardDescription>Select source material to capture from. 
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="video">Select MP4 Video</Label>
+                <div className="flex items-center gap-4">
+                  <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
+                  <Button type="submit" disabled={!file || isUploading} className="min-w-[120px]">
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="mr-2 h-4 w-4" />
+                        Upload
+                      </>
+                    )}
                   </Button>
                 </div>
-              )}
-              {wordFrequencies && (
-                <div className="mb-4 p-4 bg-muted rounded-md">
-                  <h4 className="font-medium mb-4">Top 10 Most Frequent Words:</h4>
-                  <div className="h-[400px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={wordFrequencies.map(([word, count]) => ({
-                          word,
-                          count
-                        }))}
-                        layout="vertical"
-                      >
-                        <XAxis type="number" />
-                        <YAxis 
-                          type="category" 
-                          dataKey="word" 
-                          width={100}
-                          tick={{ fontSize: 12 }}
-                        />
-                        <Tooltip />
-                        <Bar 
-                          dataKey="count" 
-                          fill="hsl(var(--primary))"
-                          radius={[0, 4, 4, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
+                {file && (
+                  <p className="text-sm text-muted-foreground">
+                    Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                  </p>
+                )}
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
                 </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-end">
+            </form>
+
+          </CardContent>
+        
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Process</CardTitle>
+            <CardDescription>
+     
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
           {response && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setFile(null)
-                setResponse(null)
-              }}
-            >
-              Reset
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
+              <div className="mt-8 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Response:</h3>
+                </div>
+                <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
+                  <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Consume</CardTitle>
+            <CardDescription>
+  {response && (
+              <div className="mt-8 space-y-4">
+                {response.result && (
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={calculateWordFrequencies}
+                      className="mb-2"
+                    >
+                      Analyze Word Frequency
+                    </Button>
+                  </div>
+                )}
+                {wordFrequencies && (
+                  <div className="mb-4 p-4 bg-muted rounded-md">
+                    <h4 className="font-medium mb-4">Top 10 Most Frequent Words:</h4>
+                    <div className="h-[400px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={wordFrequencies.map(([word, count]) => ({
+                            word,
+                            count
+                          }))}
+                          layout="vertical"
+                        >
+                          <XAxis type="number" />
+                          <YAxis 
+                            type="category" 
+                            dataKey="word" 
+                            width={100}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <Tooltip />
+                          <Bar 
+                            dataKey="count" 
+                            fill="hsl(var(--primary))"
+                            radius={[0, 4, 4, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="flex justify-end">
+        <a
+            href="https://github.com/kontext21/k21-playground" 
+            target="_blank" 
+            rel="noreferrer"
+            className="text-primary hover:underline"
+          >
+            View source code on GitHub
+          </a>   
+        {response && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setFile(null)
+                    setResponse(null)
+                  }}
+                >
+                  Reset
+                </Button>
+              )}
+      </div>
     </div>
   )
 }
