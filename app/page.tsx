@@ -245,7 +245,7 @@ export default function VideoUploader() {
                     <h3 className="text-lg font-medium">Response:</h3>
                   </div>
                   <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
-                    <pre className="text-sm">{JSON.stringify(response, null, 2)}</pre>
+                    <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(response, null, 2)}</pre>
                   </div>
                 </div>
               )}
