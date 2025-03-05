@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { FileUp, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -27,11 +27,12 @@ interface ApiResponse {
 
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [response, setResponse] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [wordFrequencies, setWordFrequencies] = useState<[string, number][] | null>(null)
+  const [selectedSource, setSelectedSource] = useState<string>("excel")
+  const [pendingExample, setPendingExample] = useState<ApiResponse | null>(null)
 
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
@@ -78,7 +79,6 @@ export default function VideoUploader() {
       return
     }
 
-    setIsUploading(true)
     setError(null)
 
     try {
@@ -89,8 +89,6 @@ export default function VideoUploader() {
       setResponse(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during upload")
-    } finally {
-      setIsUploading(false)
     }
   }
 
@@ -99,34 +97,40 @@ export default function VideoUploader() {
 
   const loadExampleVideo = (exampleNumber: number) => {
     setFile(null);
-    setIsUploading(false);
     setError(null);
     setWordFrequencies(null);
+    setResponse(null);
 
     if (exampleNumber === 1) {
-      setResponse(exampleResponse1);
+      setPendingExample(exampleResponse1);
     } else if (exampleNumber === 2) {
-      setResponse(exampleResponse2);
+      setPendingExample(exampleResponse2);
     }
   };
 
   const processVideo = async () => {
     setIsProcessing(true);
+    setResponse(null);
     try {
       // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // For example videos, we can just use the example responses
-      if (!file) {
-        // If no file is uploaded, we're using an example
-        // The response is already set by loadExampleVideo
-        setIsProcessing(false);
+      if (pendingExample) {
+        // If we have a pending example, use that as the response
+        setResponse(pendingExample);
+        setPendingExample(null);
+      } else if (file) {
+        // Handle file upload and processing
+        const formData = new FormData()
+        formData.append("video", file)
+
+        const result = await uploadVideo(formData)
+        setResponse(result)
+      } else {
+        // If no file and no pending example, show error
+        setError("No content to process");
         return;
       }
-      
-      // For actual uploaded files, we would process them here
-      // This is already handled in handleSubmit, so we don't need to duplicate it
-      
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during processing");
     } finally {
@@ -148,66 +152,86 @@ export default function VideoUploader() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="preset" className="mb-2 block">Choose from examples</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      type="button" 
-                      variant="outline"
-                      className="bg-black text-white hover:bg-gray-800"
-                      onClick={() => loadExampleVideo(1)}
-                    >
-                      Excel Spreadsheet
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline"
-                      className="bg-black text-white hover:bg-gray-800"
-                      onClick={() => loadExampleVideo(2)}
-                    >
-                      PowerPoint Slide
-                    </Button>
+                  <Label htmlFor="preset" className="mb-2 block">Choose your source</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="excel"
+                        name="source"
+                        value="excel"
+                        defaultChecked
+                        onChange={() => {
+                          setSelectedSource("excel");
+                          loadExampleVideo(1);
+                        }}
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="excel">Excel Spreadsheet</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="powerpoint"
+                        name="source"
+                        value="powerpoint"
+                        onChange={() => {
+                          setSelectedSource("powerpoint");
+                          loadExampleVideo(2);
+                        }}
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="powerpoint">PowerPoint Slide</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="screen"
+                        name="source"
+                        value="screen"
+                        disabled
+                        onChange={() => setSelectedSource("screen")}
+                        className="h-4 w-4 border-gray-300 text-muted-foreground focus:ring-primary"
+                      />
+                      <Label htmlFor="screen" className="text-muted-foreground">Share your screen (coming soon)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="upload"
+                        name="source"
+                        value="upload"
+                        onChange={() => {
+                          setSelectedSource("upload");
+                          setFile(null);
+                          setResponse(null);
+                        }}
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="upload">Upload your own</Label>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+                {selectedSource === "upload" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="video">Select MP4 Video</Label>
+                    <Input 
+                      id="video" 
+                      type="file" 
+                      accept="video/mp4" 
+                      onChange={handleFileChange} 
+                      className="flex-1"
+                    />
+                    {file && (
+                      <p className="text-sm text-muted-foreground">
+                        Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                      </p>
+                    )}
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="video">Select MP4 Video</Label>
-                  <div className="flex items-center gap-4">
-                    <Input id="video" type="file" accept="video/mp4" onChange={handleFileChange} className="flex-1" />
-                    <Button 
-                      type="submit" 
-                      disabled={!file || isUploading} 
-                      className="min-w-[120px] bg-black text-white hover:bg-gray-800"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading
-                        </>
-                      ) : (
-                        <>
-                          <FileUp className="mr-2 h-4 w-4" />
-                          Upload
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  {file && (
-                    <p className="text-sm text-muted-foreground">
-                      Selected: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
-                    </p>
-                  )}
-                  {error && <p className="text-sm text-destructive">{error}</p>}
-                  <p className="text-sm text-muted-foreground">Max file size: 50MB</p>
-                </div>
+                )}
               </div>
             </form>
           </CardContent>
@@ -225,8 +249,7 @@ export default function VideoUploader() {
               <div className="mb-4">
                 <Button 
                   onClick={processVideo}
-                  disabled={isProcessing || (!file && !response)}
-                  className="w-full bg-black text-white hover:bg-gray-800"
+                  disabled={isProcessing || (!file && !pendingExample)}
                 >
                   {isProcessing ? (
                     <>
@@ -242,7 +265,7 @@ export default function VideoUploader() {
               {response && (
                 <div className="mt-4 space-y-4 flex-grow">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Response:</h3>
+                    <h3 className="text-lg font-medium">Output:</h3>
                   </div>
                   <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
                     <pre className="text-sm whitespace-pre-wrap">{JSON.stringify(response, null, 2)}</pre>
@@ -260,15 +283,18 @@ export default function VideoUploader() {
   {response && (
               <div className="mt-8 space-y-4">
                 {response.result && (
-                  <div className="flex justify-end">
+                  <div className="flex">
                     <Button
                       onClick={calculateWordFrequencies}
-                      className="mb-2 bg-black text-white hover:bg-gray-800"
+                      className="mb-2 "
                     >
                       Analyze Word Frequency
                     </Button>
                   </div>
                 )}
+                <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">Analysis:</h3>
+                </div>
                 {wordFrequencies && (
                   <div className="mb-4 p-4 bg-muted rounded-md">
                     <h4 className="font-medium mb-4">Top 10 Most Frequent Words:</h4>
@@ -307,28 +333,28 @@ export default function VideoUploader() {
           </CardContent>
         </Card>
       </div>
-      <div className="flex justify-end mt-6">
-        <a
-            href="https://github.com/kontext21/k21-playground" 
-            target="_blank" 
-            rel="noreferrer"
-            className="text-primary hover:underline"
-          >
-            View source code on GitHub
-          </a>   
-        {response && (
-                <Button
-                  variant="outline"
-                  className="bg-black text-white hover:bg-gray-800"
-                  onClick={() => {
-                    setFile(null)
-                    setResponse(null)
-                    setWordFrequencies(null)
-                  }}
-                >
-                  Reset
-                </Button>
-              )}
+      <div className="flex justify-end mt-6 space-x-4">
+      {response && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setFile(null)
+                  setResponse(null)
+                  setWordFrequencies(null)
+                }}
+              >
+                Reset
+              </Button>
+            )}
+        <Button variant="outline" >
+            <a 
+              href="https://github.com/kontext21/k21-playground"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View source code on GitHub
+            </a>
+          </Button>
       </div>
     </div>
   )
