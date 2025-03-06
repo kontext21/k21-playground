@@ -195,19 +195,6 @@ export default function VideoUploader() {
                     <div className="flex items-center space-x-2">
                       <input
                         type="radio"
-                        id="screen"
-                        name="source"
-                        value="screen"
-                        onChange={() => {
-                          setSource({ type: "screen", example: null });
-                        }}
-                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <Label htmlFor="screen">Share your screen</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
                         id="upload"
                         name="source"
                         value="upload"
@@ -219,6 +206,20 @@ export default function VideoUploader() {
                         className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                       />
                       <Label htmlFor="upload">Upload your own</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="screen"
+                        name="source"
+                        value="screen"
+                        onChange={() => {
+                          setSource({ type: "screen", example: null });
+                        }}
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                        disabled
+                      />
+                      <Label htmlFor="screen">Share your screen (coming soon)</Label>
                     </div>
                   </div>
                 </div>
