@@ -336,7 +336,7 @@ export default function VideoUploader() {
           </CardContent>
         </Card>
 
-        {step === "process" && (
+        
           <Card className="min-h-[600px]">
             <CardHeader>
               <CardTitle className="text-2xl">Process</CardTitle>
@@ -344,6 +344,7 @@ export default function VideoUploader() {
                 Extract text from your video frames
               </CardDescription>
             </CardHeader>
+            {step === "process" && (
             <CardContent className="h-full overflow-auto">
               <div className="flex flex-col h-full">
                 <div className="mb-4">
@@ -381,25 +382,27 @@ export default function VideoUploader() {
                 )}
               </div>
             </CardContent>
+            )}
           </Card>
-        )}
+        
 
-        {response && (
+        
           <Card className="min-h-[600px]">
             <CardHeader>
               <CardTitle className="text-2xl">Consume</CardTitle>
               <CardDescription>
                 <div className="mt-8 space-y-4">
-                  {response.result && (
-                    <div className="flex">
-                      <Button
-                        onClick={calculateWordFrequencies}
-                        className="mb-2 "
-                      >
-                        Analyze Word Frequency
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex">
+                    <Button
+                      onClick={calculateWordFrequencies}
+                      className="mb-2"
+                      disabled={!response?.result}
+                    >
+                      Analyze Word Frequency
+                    </Button>
+                  </div>
+                    
+                  
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium">Analysis:</h3>
                   </div>
@@ -437,10 +440,11 @@ export default function VideoUploader() {
                   )}
                 </div>
               </CardDescription>
+              
             </CardHeader>
             <CardContent className="h-full"></CardContent>
           </Card>
-        )}
+        
       </div>
       <div className="flex justify-end mt-6 space-x-4">
         {response && (
