@@ -5,7 +5,10 @@ import type React from "react";
 import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PiMicrosoftExcelLogo, PiMicrosoftPowerpointLogo } from "react-icons/pi";
+import {
+  PiMicrosoftExcelLogo,
+  PiMicrosoftPowerpointLogo,
+} from "react-icons/pi";
 import {
   Card,
   CardContent,
@@ -40,7 +43,7 @@ interface ApiResponse {
 }
 
 type VideoSource = {
-  type: "excel" | "powerpoint" | "screen" | "upload";
+  type: "excel" | "powerpoint" | "screen" | "upload" | null;
   example?: ApiResponse | null;
 };
 
@@ -54,8 +57,8 @@ export default function VideoUploader() {
   >(null);
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
   const [source, setSource] = useState<VideoSource>({
-    type: "excel",
-    example: exampleResponse1Json as ApiResponse,
+    type: null,
+    example: null,
   });
   const [step, setStep] = useState<"select" | "process">("select");
 
@@ -201,12 +204,12 @@ export default function VideoUploader() {
                           id="excel"
                           name="source"
                           value="excel"
-                          defaultChecked
                           onChange={() => {
                             setSource({
                               type: "excel",
                               example: exampleResponse1Json as ApiResponse,
                             });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
@@ -228,12 +231,15 @@ export default function VideoUploader() {
                               type: "powerpoint",
                               example: exampleResponse2Json as ApiResponse,
                             });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="powerpoint">
-                          Sample 2: User session with{" "} <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block"/> slide
+                          Sample 2: User session with{" "}
+                          <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block" />{" "}
+                          slide
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -259,6 +265,7 @@ export default function VideoUploader() {
                           value="screen"
                           onChange={() => {
                             setSource({ type: "screen", example: null });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
@@ -421,50 +428,54 @@ export default function VideoUploader() {
             <CardTitle className="text-2xl">Consume</CardTitle>
             <CardDescription>
               <div className="mt-8 space-y-4">
-                <div className="flex">
-                  <Button
-                    onClick={calculateWordFrequencies}
-                    className="mb-2"
-                    disabled={!response?.result}
-                  >
-                    Analyze Word Frequency
-                  </Button>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Analysis:</h3>
-                </div>
-                {wordFrequencies && (
-                  <div className="mb-4 p-4 bg-muted rounded-md">
-                    <h4 className="font-medium mb-4">
-                      Top 10 Most Frequent Words:
-                    </h4>
-                    <div className="h-[400px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={wordFrequencies.map(([word, count]) => ({
-                            word,
-                            count,
-                          }))}
-                          layout="vertical"
-                        >
-                          <XAxis type="number" />
-                          <YAxis
-                            type="category"
-                            dataKey="word"
-                            width={100}
-                            tick={{ fontSize: 12 }}
-                          />
-                          <Tooltip />
-                          <Bar
-                            dataKey="count"
-                            fill="hsl(var(--primary))"
-                            radius={[0, 4, 4, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
+                {step === "process" && (
+                  <>
+                    <div className="flex">
+                      <Button
+                        onClick={calculateWordFrequencies}
+                        className="mb-2"
+                        disabled={!response?.result || isProcessing}
+                      >
+                        Analyze Word Frequency
+                      </Button>
                     </div>
-                  </div>
+
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-medium">Analysis:</h3>
+                    </div>
+                    {wordFrequencies && (
+                      <div className="mb-4 p-4 bg-muted rounded-md">
+                        <h4 className="font-medium mb-4">
+                          Top 10 Most Frequent Words:
+                        </h4>
+                        <div className="h-[400px] w-full">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={wordFrequencies.map(([word, count]) => ({
+                                word,
+                                count,
+                              }))}
+                              layout="vertical"
+                            >
+                              <XAxis type="number" />
+                              <YAxis
+                                type="category"
+                                dataKey="word"
+                                width={100}
+                                tick={{ fontSize: 12 }}
+                              />
+                              <Tooltip />
+                              <Bar
+                                dataKey="count"
+                                fill="hsl(var(--primary))"
+                                radius={[0, 4, 4, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </CardDescription>
