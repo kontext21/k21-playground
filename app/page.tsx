@@ -5,6 +5,7 @@ import type React from "react";
 import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PiMicrosoftExcelLogo, PiMicrosoftPowerpointLogo } from "react-icons/pi";
 import {
   Card,
   CardContent,
@@ -211,7 +212,9 @@ export default function VideoUploader() {
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="excel">
-                          Sample 1: User session with Excel spreadsheet
+                          Sample 1: User session with{" "}
+                          <PiMicrosoftExcelLogo className="w-5 h-5 inline-block" />{" "}
+                          spreadsheet
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -230,7 +233,7 @@ export default function VideoUploader() {
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="powerpoint">
-                          Sample 2: User session with PowerPoint slide
+                          Sample 2: User session with{" "} <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block"/> slide
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -259,7 +262,6 @@ export default function VideoUploader() {
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                          disabled
                         />
                         <Label htmlFor="screen">
                           Share your screen (coming soon)
@@ -278,18 +280,48 @@ export default function VideoUploader() {
                   {source.type === "upload" && (
                     <div className="space-y-2">
                       <Label htmlFor="video">Select MP4 Video</Label>
-                      <Input
-                        id="video"
-                        type="file"
-                        accept="video/mp4"
-                        onChange={handleFileChange}
-                        className="flex-1"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          id="video"
+                          type="file"
+                          accept="video/mp4"
+                          onChange={handleFileChange}
+                          className="flex-1"
+                        />
+                        {file && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setFile(null);
+                              setError(null);
+                            }}
+                          >
+                            Clear
+                          </Button>
+                        )}
+                      </div>
                       {file && (
-                        <p className="text-sm text-muted-foreground">
-                          Selected: {file.name} (
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB)
-                        </p>
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            Selected: {file.name} (
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB)
+                          </p>
+                          <div className="mt-4">
+                            <h4 className="text-sm font-medium mb-2">
+                              Preview:
+                            </h4>
+                            <div className="relative w-full aspect-video bg-muted rounded-md overflow-hidden">
+                              <video
+                                controls
+                                className="absolute inset-0 w-full h-full object-contain"
+                                src={URL.createObjectURL(file)}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          </div>
+                        </>
                       )}
                       <p className="text-sm text-muted-foreground">
                         Max file size: 50MB
@@ -336,15 +368,14 @@ export default function VideoUploader() {
           </CardContent>
         </Card>
 
-        
-          <Card className="min-h-[600px]">
-            <CardHeader>
-              <CardTitle className="text-2xl">Process</CardTitle>
-              <CardDescription>
-                Extract text from your video frames
-              </CardDescription>
-            </CardHeader>
-            {step === "process" && (
+        <Card className="min-h-[600px]">
+          <CardHeader>
+            <CardTitle className="text-2xl">Process</CardTitle>
+            <CardDescription>
+              Extract text from your video frames
+            </CardDescription>
+          </CardHeader>
+          {step === "process" && (
             <CardContent className="h-full overflow-auto">
               <div className="flex flex-col h-full">
                 <div className="mb-4">
@@ -382,69 +413,64 @@ export default function VideoUploader() {
                 )}
               </div>
             </CardContent>
-            )}
-          </Card>
-        
+          )}
+        </Card>
 
-        
-          <Card className="min-h-[600px]">
-            <CardHeader>
-              <CardTitle className="text-2xl">Consume</CardTitle>
-              <CardDescription>
-                <div className="mt-8 space-y-4">
-                  <div className="flex">
-                    <Button
-                      onClick={calculateWordFrequencies}
-                      className="mb-2"
-                      disabled={!response?.result}
-                    >
-                      Analyze Word Frequency
-                    </Button>
-                  </div>
-                    
-                  
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Analysis:</h3>
-                  </div>
-                  {wordFrequencies && (
-                    <div className="mb-4 p-4 bg-muted rounded-md">
-                      <h4 className="font-medium mb-4">
-                        Top 10 Most Frequent Words:
-                      </h4>
-                      <div className="h-[400px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={wordFrequencies.map(([word, count]) => ({
-                              word,
-                              count,
-                            }))}
-                            layout="vertical"
-                          >
-                            <XAxis type="number" />
-                            <YAxis
-                              type="category"
-                              dataKey="word"
-                              width={100}
-                              tick={{ fontSize: 12 }}
-                            />
-                            <Tooltip />
-                            <Bar
-                              dataKey="count"
-                              fill="hsl(var(--primary))"
-                              radius={[0, 4, 4, 0]}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  )}
+        <Card className="min-h-[600px]">
+          <CardHeader>
+            <CardTitle className="text-2xl">Consume</CardTitle>
+            <CardDescription>
+              <div className="mt-8 space-y-4">
+                <div className="flex">
+                  <Button
+                    onClick={calculateWordFrequencies}
+                    className="mb-2"
+                    disabled={!response?.result}
+                  >
+                    Analyze Word Frequency
+                  </Button>
                 </div>
-              </CardDescription>
-              
-            </CardHeader>
-            <CardContent className="h-full"></CardContent>
-          </Card>
-        
+
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Analysis:</h3>
+                </div>
+                {wordFrequencies && (
+                  <div className="mb-4 p-4 bg-muted rounded-md">
+                    <h4 className="font-medium mb-4">
+                      Top 10 Most Frequent Words:
+                    </h4>
+                    <div className="h-[400px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={wordFrequencies.map(([word, count]) => ({
+                            word,
+                            count,
+                          }))}
+                          layout="vertical"
+                        >
+                          <XAxis type="number" />
+                          <YAxis
+                            type="category"
+                            dataKey="word"
+                            width={100}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <Tooltip />
+                          <Bar
+                            dataKey="count"
+                            fill="hsl(var(--primary))"
+                            radius={[0, 4, 4, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-full"></CardContent>
+        </Card>
       </div>
       <div className="flex justify-end mt-6 space-x-4">
         {response && (
