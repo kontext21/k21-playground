@@ -62,6 +62,8 @@ export default function VideoUploader() {
   });
   const [step, setStep] = useState<"select" | "process">("select");
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
 
@@ -204,6 +206,7 @@ export default function VideoUploader() {
                           id="excel"
                           name="source"
                           value="excel"
+                          checked={source.type === "excel"}
                           onChange={() => {
                             setSource({
                               type: "excel",
@@ -226,6 +229,7 @@ export default function VideoUploader() {
                           id="powerpoint"
                           name="source"
                           value="powerpoint"
+                          checked={source.type === "powerpoint"}
                           onChange={() => {
                             setSource({
                               type: "powerpoint",
@@ -248,6 +252,7 @@ export default function VideoUploader() {
                           id="upload"
                           name="source"
                           value="upload"
+                          checked={source.type === "upload"}
                           onChange={() => {
                             setSource({ type: "upload", example: null });
                             setFile(null);
@@ -263,6 +268,7 @@ export default function VideoUploader() {
                           id="screen"
                           name="source"
                           value="screen"
+                          checked={source.type === "screen"}
                           onChange={() => {
                             setSource({ type: "screen", example: null });
                             setFile(null);
@@ -289,6 +295,7 @@ export default function VideoUploader() {
                       <Label htmlFor="video">Select MP4 Video</Label>
                       <div className="flex gap-2">
                         <Input
+                          ref={fileInputRef}
                           id="video"
                           type="file"
                           accept="video/mp4"
@@ -302,6 +309,9 @@ export default function VideoUploader() {
                             onClick={() => {
                               setFile(null);
                               setError(null);
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = "";
+                              }
                             }}
                           >
                             Clear
@@ -339,7 +349,7 @@ export default function VideoUploader() {
                 <Button
                   type="button"
                   onClick={() => setStep("process")}
-                  disabled={source.type === "upload" && !file}
+                  disabled={!source.type || (source.type === "upload" && !file)}
                 >
                   Confirm Selection
                 </Button>
@@ -484,19 +494,21 @@ export default function VideoUploader() {
         </Card>
       </div>
       <div className="flex justify-end mt-6 space-x-4">
-        {response && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              setFile(null);
-              setResponse(null);
-              setWordFrequencies(null);
-              setStep("select");
-            }}
-          >
-            Reset
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          onClick={() => {
+            setFile(null);
+            setResponse(null);
+            setWordFrequencies(null);
+            setSource({ type: null, example: null });
+            setStep("select");
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+          }}
+        >
+          Reset
+        </Button>
         <Button variant="outline">
           <a
             href="https://github.com/kontext21/k21-playground"
