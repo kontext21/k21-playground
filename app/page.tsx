@@ -384,7 +384,7 @@ export default function VideoUploader() {
                     disabled={
                       isProcessing ||
                       (!file && !source.example && !videoBase64) ||
-                      step === "select"
+                      step !== "process"
                     }
                   >
                     {isProcessing ? (
