@@ -5,6 +5,8 @@ import type React from "react";
 import { useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { PiMicrosoftExcelLogo, PiMicrosoftPowerpointLogo } from "react-icons/pi";
 import {
   Card,
@@ -175,15 +177,16 @@ export default function VideoUploader() {
 
   return (
     <div ref={appRef} className="container max-w-full px-4 py-10">
-      <h1 className="text-4xl font-bold text-center mb-8">
+      <Header />
+      {/* <h1 className="text-4xl font-bold text-center mb-8">
         Kontext21 Playground
-      </h1>
+      </h1> */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
         <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription>
-              Context is build from source material.
+            Context is gathered from a variety of sources. Below are several sample sources you can explore. Choose one that interests you, experiment with it, and enjoy analyzing the results!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -372,7 +375,8 @@ export default function VideoUploader() {
           <CardHeader>
             <CardTitle className="text-2xl">Process</CardTitle>
             <CardDescription>
-              Extract text from your video frames
+              Extract text from your video frames.
+              Now that you&apos;ve selected a source for your context, choose one of our cloud processors to analyze it and extract meaningful data.
             </CardDescription>
           </CardHeader>
           {step === "process" && (
@@ -421,7 +425,8 @@ export default function VideoUploader() {
             <CardTitle className="text-2xl">Consume</CardTitle>
             <CardDescription>
               <div className="mt-8 space-y-4">
-                <div className="flex">
+                <div className="flex flex-col">
+                  <p className="mb-5">Great! You&apos;ve gathered some data, but making sense of it can be challenging. Let's dive deeper, analyze it, and uncover powerful, actionable insights!</p>
                   <Button
                     onClick={calculateWordFrequencies}
                     className="mb-2"
@@ -496,6 +501,7 @@ export default function VideoUploader() {
           </a>
         </Button>
       </div>
+      <Footer />
     </div>
   );
 }
