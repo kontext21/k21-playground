@@ -426,7 +426,7 @@ export default function VideoUploader() {
             <CardDescription>
               <div className="mt-8 space-y-4">
                 <div className="flex flex-col">
-                  <p className="mb-5">Great! You&apos;ve gathered some data, but making sense of it can be challenging. Let's dive deeper, analyze it, and uncover powerful, actionable insights!</p>
+                  <p className="mb-5">Great! You&apos;ve gathered some data, but making sense of it can be challenging. Let&apos;s dive deeper, analyze it, and uncover powerful, actionable insights!</p>
                   <Button
                     onClick={calculateWordFrequencies}
                     className="mb-2"
