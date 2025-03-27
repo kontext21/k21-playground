@@ -29,7 +29,7 @@ First, run the development server:
 npm run dev
 ```
 
-Note: You need to have a local k21-processor running to use the playground and change the url in the `app/page.tsx` file to `http://localhost:3001`.
+Note: You need to have a local k21-processor running to use the playground and change the url in the `app/page.tsx` file to `http://localhost:3000`.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
