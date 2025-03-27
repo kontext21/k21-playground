@@ -4,20 +4,20 @@ import logo from "@/app/assets/k21-logo.png";
 const Header = () => {
   return (
     <header className="py-2">
-      <div className="container flex justify-between items-center">
-        <Image
-          src={logo}
-          alt="logo"
-          width={120}
-          height={120}
-          className="w-[120px] h-auto"
-        />
-        <p className="text-lg leading-relaxed text-center">
-          We build tools for developers to make sense of their users&apos;
-          context. A lot of user data is outside of reach for apps, because
-          access requires APIs and permissions. We allow developers to query
-          information directly from the screen, voice and operating system.
-        </p>
+      <div className="container flex flex-col">
+        <div className="flex items-center gap-4 mb-4">
+          <Image
+            src={logo}
+            alt="logo"
+            className="w-[90px] h-auto"
+          />
+          <h1 className="text-4xl font-bold">
+            Playground
+          </h1>
+          <p className="text-lg leading-relaxed">
+            Make your software context-aware! The K21 SDK has everything you need to capture user data, contextualize it and deliver real value add.
+          </p>
+        </div>
       </div>
     </header>
   );
