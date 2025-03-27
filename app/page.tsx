@@ -186,7 +186,7 @@ export default function VideoUploader() {
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription>
-            Context is gathered from a variety of sources. Below are several sample sources you can explore. Choose one that interests you, experiment with it, and enjoy analyzing the results!
+            Context needs to be captured from the users screen first. Below are several sample screen captures.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -195,7 +195,7 @@ export default function VideoUploader() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="preset" className="mb-2 block">
-                      Choose your source:
+                      Choose a sample source:
                     </Label>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
@@ -252,7 +252,7 @@ export default function VideoUploader() {
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="upload">Upload your own</Label>
+                        <Label htmlFor="upload">Upload video</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
@@ -265,6 +265,7 @@ export default function VideoUploader() {
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                          disabled
                         />
                         <Label htmlFor="screen">
                           Share your screen (coming soon)
@@ -337,7 +338,7 @@ export default function VideoUploader() {
                   onClick={() => setStep("process")}
                   disabled={source.type === "upload" && !file}
                 >
-                  Confirm Selection
+                  Submit Capture
                 </Button>
               </form>
             ) : (
@@ -373,10 +374,12 @@ export default function VideoUploader() {
 
         <Card className="min-h-[600px]">
           <CardHeader>
-            <CardTitle className="text-2xl">Process</CardTitle>
-            <CardDescription>
-              Extract text from your video frames.
-              Now that you&apos;ve selected a source for your context, choose one of our cloud processors to analyze it and extract meaningful data.
+            <CardTitle className={`text-2xl ${step !== "process" ? "text-muted-foreground/20" : ""}`}>
+              Process
+            </CardTitle>
+            <CardDescription className={step !== "process" ? "text-muted-foreground/20" : ""}>
+              Extracts text from the screen capture frames.
+              Now that you&apos;ve selected a source for your context, run it through K21 cloud processor to analyze it and extract OCR data.
             </CardDescription>
           </CardHeader>
           {step === "process" && (
@@ -427,13 +430,14 @@ export default function VideoUploader() {
               <div className="mt-8 space-y-4">
                 <div className="flex flex-col">
                   <p className="mb-5">Great! You&apos;ve gathered some data, but making sense of it can be challenging. Let&apos;s dive deeper, analyze it, and uncover powerful, actionable insights!</p>
-                  <Button
-                    onClick={calculateWordFrequencies}
-                    className="mb-2"
-                    disabled={!response?.result}
-                  >
-                    Analyze Word Frequency
-                  </Button>
+                  <div className="mb-4">
+                    <Button
+                      onClick={calculateWordFrequencies}
+                      disabled={!response?.result}
+                    >
+                      Analyze Word Frequency
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center">
