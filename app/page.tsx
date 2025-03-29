@@ -72,6 +72,7 @@ export default function VideoUploader() {
       const isInIframe = window.self !== window.top;
       setShowHeader(!isInIframe);
     } catch (e) {
+      console.log("Error checking if in iframe", e);
       // If we can't access window.top, we're in an iframe
       setShowHeader(false);
     }
