@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -57,6 +57,7 @@ export default function VideoUploader() {
     [string, number][] | null
   >(null);
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
+  const [showHeader, setShowHeader] = useState(false);
   const [source, setSource] = useState<VideoSource>({
     type: "excel",
     example: exampleResponse1Json as ApiResponse,
@@ -65,6 +66,16 @@ export default function VideoUploader() {
 
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const isInIframe = window.self !== window.top;
+      setShowHeader(!isInIframe);
+    } catch (e) {
+      // If we can't access window.top, we're in an iframe
+      setShowHeader(false);
+    }
+  }, []);
 
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
@@ -180,10 +191,7 @@ export default function VideoUploader() {
 
   return (
     <div ref={appRef} className="container max-w-full px-4 py-10">
-      <Header />
-      {/* <h1 className="text-4xl font-bold text-center mb-8">
-        Kontext21 Playground
-      </h1> */}
+      {showHeader && <Header />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
         <Card className="min-h-[600px]">
           <CardHeader>

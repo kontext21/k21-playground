@@ -1,5 +1,8 @@
-This is Kontext21 Playground. It's a simple Next.js app that allows you to 
-1. Upload a user screen session (recorded as MP4)
+# Kontext21 Playground  
+
+It's a simple Next.js app that allows you to:
+
+1. Upload a user screen session (recorded as MP4)  
 2. Send it to the k21-processor in the cloud
 3. Display JSON response.
 
@@ -11,15 +14,14 @@ It's main purpose is to be used for quick experiments with the k21-processor and
 
 ![image](https://github.com/user-attachments/assets/8b13db47-a71d-48a4-92bc-2c98e052c767)
 
-
 ## Features planned
 
-- [X] Add a way to upload videos 
+- [X] Add a way to upload videos  
 - [ ] PNG Upload
 - [ ] Webcaputre directly in Browser
 - [ ] Switch to a different processor
 - [ ] Nicer UI for the JSON response
-- [ ] Add [docker deployment](https://github.com/vercel/next.js/tree/canary/examples/with-docker) 
+- [ ] Add [docker deployment](https://github.com/vercel/next.js/tree/canary/examples/with-docker)  
 
 ## Getting Started Locally
 
