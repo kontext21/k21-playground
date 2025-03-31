@@ -2,12 +2,14 @@
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { PiMicrosoftExcelLogo, PiMicrosoftPowerpointLogo } from "react-icons/pi";
+import {
+  PiMicrosoftExcelLogo,
+  PiMicrosoftPowerpointLogo,
+} from "react-icons/pi";
 import {
   Card,
   CardContent,
@@ -55,14 +57,26 @@ export default function VideoUploader() {
     [string, number][] | null
   >(null);
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
+  const [showHeader, setShowHeader] = useState(false);
   const [source, setSource] = useState<VideoSource>({
     type: "excel",
     example: exampleResponse1Json as ApiResponse,
   });
-  const [step, setStep] = useState<"select" | "process">("select");
+  const [step, setStep] = useState<"select" | "process" | "consume">("select");
 
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const isInIframe = window.self !== window.top;
+      setShowHeader(!isInIframe);
+    } catch (e) {
+      console.log("Error checking if in iframe", e);
+      // If we can't access window.top, we're in an iframe
+      setShowHeader(false);
+    }
+  }, []);
 
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
@@ -145,6 +159,7 @@ export default function VideoUploader() {
 
         const result = await uploadVideo(formData);
         setResponse(result);
+        setStep("consume");
       } else {
         // If no file and no example, show error
         setError("No content to process");
@@ -177,44 +192,46 @@ export default function VideoUploader() {
 
   return (
     <div ref={appRef} className="container max-w-full px-4 py-10">
-      <Header />
-      {/* <h1 className="text-4xl font-bold text-center mb-8">
-        Kontext21 Playground
-      </h1> */}
+      {showHeader && <Header />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
         <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription>
-            Context needs to be captured from the users screen first. Below are several sample screen captures.
+              Context needs to be captured from the users screen first. Below
+              are several sample screen captures.{" "}
+              <a href="https://kontext21.com/docs/capture">
+                Learn More about capture.
+              </a>
             </CardDescription>
           </CardHeader>
           <CardContent>
             {step === "select" ? (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="preset" className="mb-2 block">
                       Choose a sample source:
                     </Label>
-                    <div className="space-y-2">
+                    <div className="h-[150px] space-y-2">
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
                           id="excel"
                           name="source"
                           value="excel"
-                          defaultChecked
+                          checked={source.type === "excel"}
                           onChange={() => {
                             setSource({
                               type: "excel",
                               example: exampleResponse1Json as ApiResponse,
                             });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="excel">
+                        <Label htmlFor="excel" className="text-base">
                           Sample 1: User session with{" "}
                           <PiMicrosoftExcelLogo className="w-5 h-5 inline-block" />{" "}
                           spreadsheet
@@ -226,17 +243,21 @@ export default function VideoUploader() {
                           id="powerpoint"
                           name="source"
                           value="powerpoint"
+                          checked={source.type === "powerpoint"}
                           onChange={() => {
                             setSource({
                               type: "powerpoint",
                               example: exampleResponse2Json as ApiResponse,
                             });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="powerpoint">
-                          Sample 2: User session with{" "} <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block"/> slide
+                        <Label htmlFor="powerpoint" className="text-base">
+                          Sample 2: User session with{" "}
+                          <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block" />{" "}
+                          slide
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -245,6 +266,7 @@ export default function VideoUploader() {
                           id="upload"
                           name="source"
                           value="upload"
+                          checked={source.type === "upload"}
                           onChange={() => {
                             setSource({ type: "upload", example: null });
                             setFile(null);
@@ -252,7 +274,38 @@ export default function VideoUploader() {
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="upload">Upload video</Label>
+                        <Label htmlFor="upload" className="text-base">
+                          Upload video
+                        </Label>
+                        {source.type === "upload" && (
+                          <div className="flex items-center gap-2">
+                            {/* <Label htmlFor="video" className="text-sm">
+                              Select MP4 Video
+                            </Label> */}
+                            <Input
+                              id="video"
+                              type="file"
+                              accept="video/mp4"
+                              onChange={handleFileChange}
+                              className="flex-1 p-0 h-5"
+                            />
+                            <p className="text-sm text-muted-foreground">
+                              MP4 max size: 50MB
+                            </p>
+                            {file && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                  setFile(null);
+                                  setError(null);
+                                }}
+                              >
+                                Clear
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
@@ -260,14 +313,15 @@ export default function VideoUploader() {
                           id="screen"
                           name="source"
                           value="screen"
+                          checked={source.type === "screen"}
                           onChange={() => {
                             setSource({ type: "screen", example: null });
+                            setFile(null);
                             setResponse(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                          disabled
                         />
-                        <Label htmlFor="screen">
+                        <Label htmlFor="screen" className="text-base">
                           Share your screen (coming soon)
                         </Label>
                       </div>
@@ -279,58 +333,6 @@ export default function VideoUploader() {
                       onFileRecorded={handleRecordedFile}
                       onBase64Generated={handleBase64Generated}
                     />
-                  )}
-
-                  {source.type === "upload" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="video">Select MP4 Video</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="video"
-                          type="file"
-                          accept="video/mp4"
-                          onChange={handleFileChange}
-                          className="flex-1"
-                        />
-                        {file && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                              setFile(null);
-                              setError(null);
-                            }}
-                          >
-                            Clear
-                          </Button>
-                        )}
-                      </div>
-                      {file && (
-                        <>
-                          <p className="text-sm text-muted-foreground">
-                            Selected: {file.name} (
-                            {(file.size / (1024 * 1024)).toFixed(2)} MB)
-                          </p>
-                          <div className="mt-4">
-                            <h4 className="text-sm font-medium mb-2">
-                              Preview:
-                            </h4>
-                            <div className="relative w-full aspect-video bg-muted rounded-md overflow-hidden">
-                              <video
-                                controls
-                                className="absolute inset-0 w-full h-full object-contain"
-                                src={URL.createObjectURL(file)}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                      <p className="text-sm text-muted-foreground">
-                        Max file size: 50MB
-                      </p>
-                    </div>
                   )}
                 </div>
                 <Button
@@ -356,6 +358,49 @@ export default function VideoUploader() {
                   )}
                   {source.type === "screen" && <p>Screen Recording</p>}
                 </div>
+
+                <div className="p-4 bg-muted rounded-md h-[300px] overflow-hidden">
+                  <div className="h-full flex flex-col">
+                    {file ? (
+                      <>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Selected: {file.name} (
+                          {(file.size / (1024 * 1024)).toFixed(2)} MB)
+                        </p>
+                        <div className="flex-1 min-h-0">
+                          <h4 className="text-sm font-medium mb-2">Preview:</h4>
+                          <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
+                            <video
+                              controls
+                              className="absolute inset-0 w-full h-full object-contain"
+                              src={URL.createObjectURL(file)}
+                              onError={(e) => {
+                                const video = e.target as HTMLVideoElement;
+                                video.style.display = "none";
+                                const errorMessage =
+                                  document.createElement("div");
+                                errorMessage.className =
+                                  "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                errorMessage.textContent =
+                                  "Video cannot be played. Please try a different format.";
+                                video.parentElement?.appendChild(errorMessage);
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-muted-foreground">
+                        <p>
+                          No video selected. Please choose a video file to
+                          preview.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -374,18 +419,28 @@ export default function VideoUploader() {
 
         <Card className="min-h-[600px]">
           <CardHeader>
-            <CardTitle className={`text-2xl ${step !== "process" ? "text-muted-foreground/20" : ""}`}>
+            <CardTitle
+              className={`text-2xl ${
+                step !== "process" ? "text-muted-foreground/20" : ""
+              }`}
+            >
               Process
             </CardTitle>
-            <CardDescription className={step !== "process" ? "text-muted-foreground/20" : ""}>
-              Extracts text from the screen capture frames.
-              Now that you&apos;ve selected a source for your context, run it through K21 cloud processor to analyze it and extract OCR data.
+            <CardDescription
+              className={step !== "process" ? "text-muted-foreground/20" : ""}
+            >
+              Extracts text from the screen capture frames. Now that you&apos;ve
+              selected a source for your context, run it through K21 cloud
+              processor to analyze it and extract OCR data.{" "}
+              <a href="https://kontext21.com/docs/processing">
+                Learn more about processing.
+              </a>
             </CardDescription>
           </CardHeader>
           {step === "process" && (
             <CardContent className="h-full overflow-auto">
               <div className="flex flex-col h-full">
-                <div className="mb-4">
+                <div className="mb-4 flex flex-col">
                   <Button
                     onClick={processVideo}
                     disabled={
@@ -411,7 +466,7 @@ export default function VideoUploader() {
                     <div className="flex justify-between items-center">
                       <h3 className="text-lg font-medium">Output:</h3>
                     </div>
-                    <div className="rounded-md bg-muted p-4 overflow-auto max-h-[400px]">
+                    <div className="rounded-md bg-muted p-4 h-[300px] overflow-auto">
                       <pre className="text-sm whitespace-pre-wrap">
                         {JSON.stringify(response, null, 2)}
                       </pre>
@@ -425,11 +480,30 @@ export default function VideoUploader() {
 
         <Card className="min-h-[600px]">
           <CardHeader>
-            <CardTitle className="text-2xl">Consume</CardTitle>
-            <CardDescription>
-              <div className="mt-8 space-y-4">
-                <div className="flex flex-col">
-                  <p className="mb-5">Great! You&apos;ve gathered some data, but making sense of it can be challenging. Let&apos;s dive deeper, analyze it, and uncover powerful, actionable insights!</p>
+            <CardTitle
+              className={`text-2xl ${
+                step !== "consume" && !response
+                  ? "text-muted-foreground/20"
+                  : ""
+              }`}
+            >
+              Consume
+            </CardTitle>
+            <CardDescription
+              className={
+                step !== "consume" && !response
+                  ? "text-muted-foreground/20"
+                  : ""
+              }
+            >
+              <div className="flex flex-col">
+                <p className="mb-5">
+                  Great! You&apos;ve gathered some data, but making sense of it
+                  can be challenging. Let&apos;s dive deeper, analyze it, and
+                  uncover powerful, actionable insights!{" "}
+                  <a href="https://kontext21.com">Check out some Use Cases!</a>
+                </p>
+                {response && (
                   <div className="mb-4">
                     <Button
                       onClick={calculateWordFrequencies}
@@ -438,13 +512,18 @@ export default function VideoUploader() {
                       Analyze Word Frequency
                     </Button>
                   </div>
-                </div>
-
+                )}
+              </div>
+            </CardDescription>
+          </CardHeader>
+          {response && wordFrequencies && (
+            <CardContent className="h-full">
+              <div className="mt-8 space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-medium">Analysis:</h3>
                 </div>
                 {wordFrequencies && (
-                  <div className="mb-4 p-4 bg-muted rounded-md">
+                  <div className="rounded-md bg-muted p-4 h-[300px] overflow-auto">
                     <h4 className="font-medium mb-4">
                       Top 10 Most Frequent Words:
                     </h4>
@@ -476,9 +555,8 @@ export default function VideoUploader() {
                   </div>
                 )}
               </div>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-full"></CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
       <div className="flex justify-end mt-6 space-x-4">
@@ -504,8 +582,15 @@ export default function VideoUploader() {
             View source code on GitHub
           </a>
         </Button>
+        <Button variant="outline">
+          <a href="https://kontext21.com/">Contact Us</a>
+        </Button>
+        <Button variant="outline">
+          <a href="https://docs.kontext21.com/quickstart">
+            Try to build your own
+          </a>
+        </Button>
       </div>
-      <Footer />
     </div>
   );
 }
