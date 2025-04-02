@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import exampleResponse1Json from "@/test/example-ouput-small.json";
 import exampleResponse2Json from "@/test/example-output-mid.json";
+import examplevideo from "@/test/test-output-small.mp4";
 import ScreenRecorder from "@/components/ScreenRecorder";
 
 interface ApiResponse {
@@ -197,10 +198,13 @@ export default function VideoUploader() {
         <Card className="min-h-[600px]">
           <CardHeader>
             <CardTitle className="text-2xl">Capture</CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               Context needs to be captured from the users screen first. Below
               are several sample screen captures.{" "}
-              <a href="https://kontext21.com/docs/capture">
+              <a
+                href="https://docs.kontext21.com/concepts/capture"
+                className="text-primary hover:underline"
+              >
                 Learn More about capture.
               </a>
             </CardDescription>
@@ -210,7 +214,7 @@ export default function VideoUploader() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="preset" className="mb-2 block">
+                    <Label htmlFor="preset" className="text-base mb-2 block">
                       Choose a sample source:
                     </Label>
                     <div className="h-[150px] space-y-2">
@@ -260,6 +264,81 @@ export default function VideoUploader() {
                           slide
                         </Label>
                       </div>
+                      {source.type === "powerpoint" ? (
+                        <>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Selected: Sample PowerPoint Video
+                          </p>
+                          <div className="flex-1 min-h-0">
+                            <h4 className="text-sm font-medium mb-2">
+                              Preview:
+                            </h4>
+                            <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
+                              <video
+                                controls
+                                className="absolute inset-0 w-full h-full object-contain"
+                                src={examplevideo}
+                                onError={(e) => {
+                                  const video = e.target as HTMLVideoElement;
+                                  video.style.display = "none";
+                                  const errorMessage =
+                                    document.createElement("div");
+                                  errorMessage.className =
+                                    "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                  errorMessage.textContent =
+                                    "Video cannot be played. Please try a different format.";
+                                  video.parentElement?.appendChild(
+                                    errorMessage
+                                  );
+                                }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          </div>
+                        </>
+                      ) : file ? (
+                        <>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Selected: {file.name} (
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB)
+                          </p>
+                          <div className="flex-1 min-h-0">
+                            <h4 className="text-sm font-medium mb-2">
+                              Preview:
+                            </h4>
+                            <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
+                              <video
+                                controls
+                                className="absolute inset-0 w-full h-full object-contain"
+                                src={URL.createObjectURL(file)}
+                                onError={(e) => {
+                                  const video = e.target as HTMLVideoElement;
+                                  video.style.display = "none";
+                                  const errorMessage =
+                                    document.createElement("div");
+                                  errorMessage.className =
+                                    "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                  errorMessage.textContent =
+                                    "Video cannot be played. Please try a different format.";
+                                  video.parentElement?.appendChild(
+                                    errorMessage
+                                  );
+                                }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="h-full flex items-center justify-center text-muted-foreground">
+                          <p>
+                            No video selected. Please choose a video file to
+                            preview.
+                          </p>
+                        </div>
+                      )}
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
@@ -287,7 +366,7 @@ export default function VideoUploader() {
                               type="file"
                               accept="video/mp4"
                               onChange={handleFileChange}
-                              className="flex-1 p-0 h-5"
+                              className="flex-1 p-0 h-15"
                             />
                             <p className="text-sm text-muted-foreground">
                               MP4 max size: 50MB
@@ -319,6 +398,7 @@ export default function VideoUploader() {
                             setFile(null);
                             setResponse(null);
                           }}
+                          disabled
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="screen" className="text-base">
@@ -427,12 +507,19 @@ export default function VideoUploader() {
               Process
             </CardTitle>
             <CardDescription
-              className={step !== "process" ? "text-muted-foreground/20" : ""}
+              className={
+                step !== "process"
+                  ? "text-muted-foreground/20 text-base"
+                  : "text-base"
+              }
             >
               Extracts text from the screen capture frames. Now that you&apos;ve
               selected a source for your context, run it through K21 cloud
               processor to analyze it and extract OCR data.{" "}
-              <a href="https://kontext21.com/docs/processing">
+              <a
+                href="https://kontext21.com/docs/processing"
+                className="text-primary hover:underline"
+              >
                 Learn more about processing.
               </a>
             </CardDescription>
@@ -492,8 +579,8 @@ export default function VideoUploader() {
             <CardDescription
               className={
                 step !== "consume" && !response
-                  ? "text-muted-foreground/20"
-                  : ""
+                  ? "text-muted-foreground/20 text-base"
+                  : "text-base"
               }
             >
               <div className="flex flex-col">
@@ -501,7 +588,12 @@ export default function VideoUploader() {
                   Great! You&apos;ve gathered some data, but making sense of it
                   can be challenging. Let&apos;s dive deeper, analyze it, and
                   uncover powerful, actionable insights!{" "}
-                  <a href="https://kontext21.com">Check out some Use Cases!</a>
+                  <a
+                    href="https://kontext21.com"
+                    className="text-primary hover:underline"
+                  >
+                    Check out some Use Cases!
+                  </a>
                 </p>
                 {response && (
                   <div className="mb-4">
@@ -575,15 +667,15 @@ export default function VideoUploader() {
         )}
         <Button variant="outline">
           <a
-            href="https://github.com/kontext21/k21-playground"
+            href="https://github.com/kontext21/k21-node"
             target="_blank"
             rel="noreferrer"
           >
-            View source code on GitHub
+            K21 SDK on GitHub
           </a>
         </Button>
         <Button variant="outline">
-          <a href="https://kontext21.com/">Contact Us</a>
+          <a href="https://kontext21.com/contact">Contact Us</a>
         </Button>
         <Button variant="outline">
           <a href="https://docs.kontext21.com/quickstart">
