@@ -87,6 +87,7 @@ export default function VideoUploader() {
     try {
       setIsInIframe(window.self !== window.top);
     } catch (e) {
+      console.log("Error checking if in iframe", e);
       setIsInIframe(true);
     }
   }, []);
