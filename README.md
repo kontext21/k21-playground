@@ -37,7 +37,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This is a [Next.js](https://nextjs.org) project integrated with [PostHog](https://posthog.com/) for event-based analytics.  
+This is a [Next.js](https://nextjs.org) project integrated with [PostHog](https://posthog.com/) for event-based analytics. 
 
 ## Analytics
 
