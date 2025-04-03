@@ -153,7 +153,6 @@ export default function ScreenRecorder({ onFileRecorded, onBase64Generated }: Sc
           // Convert to base64
           try {
             const base64 = await blobToBase64(blob);
-            console.log("base64 of the video", {base64});
             
             // Call the callback if provided
             if (onBase64Generated) {

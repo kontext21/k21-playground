@@ -7,17 +7,13 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import {
-  PiMicrosoftExcelLogo,
-  PiMicrosoftPowerpointLogo,
-} from "react-icons/pi";
-import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadVideo, uploadBase64 } from "@/app/actions";
 import {
@@ -28,10 +24,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import exampleResponse1Json from "@/test/example-ouput-small.json";
-import exampleResponse2Json from "@/test/example-output-mid.json";
-import examplevideo from "@/test/test-output-small.mp4";
+import exampleResponse1Json from "@/test/example-ouput-LI.json";
+import exampleResponse2Json from "@/test/example-output-github.json";
 import ScreenRecorder from "@/components/ScreenRecorder";
+import { filterText } from "@/lib/utils";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 interface ApiResponse {
   base64_data?: string;
@@ -45,7 +42,7 @@ interface ApiResponse {
 }
 
 type VideoSource = {
-  type: "excel" | "powerpoint" | "screen" | "upload";
+  type: "github" | "linkedin" | "screen";
   example?: ApiResponse | null;
 };
 
@@ -60,10 +57,11 @@ export default function VideoUploader() {
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
   const [showHeader, setShowHeader] = useState(false);
   const [source, setSource] = useState<VideoSource>({
-    type: "excel",
+    type: "github",
     example: exampleResponse1Json as ApiResponse,
   });
   const [step, setStep] = useState<"select" | "process" | "consume">("select");
+  const [exampleVideoUrl, setExampleVideoUrl] = useState<string | null>(null);
 
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
@@ -79,6 +77,11 @@ export default function VideoUploader() {
     }
   }, []);
 
+  useEffect(() => {
+    // Set the example video URL for the first sample on mount
+    setExampleVideoUrl("/videos/example-ouput-LI.mp4");
+  }, []); // Empty dependency array means this runs once on mount
+
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
 
@@ -89,13 +92,17 @@ export default function VideoUploader() {
       .toLowerCase();
 
     const words = allText.match(/\b\w+\b/g) || [];
+    const filteredWords = words.filter(word => {
+      const filteredWord = filterText(word);
+      return filteredWord.length > 0;
+    }).map(word => word.toLowerCase());
 
     // Count word frequencies
-    const frequencies = words.reduce((acc: { [key: string]: number }, word) => {
+    const frequencies = filteredWords.reduce((acc: { [key: string]: number }, word) => {
       acc[word] = (acc[word] || 0) + 1;
       return acc;
     }, {});
-
+ 
     // Convert to array and sort by frequency
     const sortedFrequencies = Object.entries(frequencies)
       .sort(([, a], [, b]) => b - a)
@@ -104,18 +111,18 @@ export default function VideoUploader() {
     setWordFrequencies(sortedFrequencies);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.type !== "video/mp4") {
-        setError("Please select an MP4 file");
-        setFile(null);
-        return;
-      }
-      setFile(selectedFile);
-      setError(null);
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     const selectedFile = e.target.files[0];
+  //     if (selectedFile.type !== "video/mp4") {
+  //       setError("Please select an MP4 file");
+  //       setFile(null);
+  //       return;
+  //     }
+  //     setFile(selectedFile);
+  //     setError(null);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,26 +150,16 @@ export default function VideoUploader() {
     setIsProcessing(true);
     setResponse(null);
     try {
-      // Simulate processing delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       if (source.example) {
-        // If we have an example, use that as the response
         setResponse(source.example);
+        setStep("process");
       } else if (source.type === "screen" && videoBase64) {
-        // For screen recordings, use the base64 data if available
         const result = await uploadBase64(videoBase64);
         setResponse(result);
-      } else if (file) {
-        // Handle file upload and processing
-        const formData = new FormData();
-        formData.append("video", file);
-
-        const result = await uploadVideo(formData);
-        setResponse(result);
-        setStep("consume");
+        setStep("process");
       } else {
-        // If no file and no example, show error
         setError("No content to process");
         return;
       }
@@ -195,8 +192,8 @@ export default function VideoUploader() {
     <div ref={appRef} className="container max-w-full px-4 py-10">
       {showHeader && <Header />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
-        <Card className="min-h-[600px]">
-          <CardHeader>
+        <Card className="min-h-[600px] flex flex-col">
+          <CardHeader className="flex-shrink-0">
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription className="text-base">
               Context needs to be captured from the users screen first. Below
@@ -209,7 +206,7 @@ export default function VideoUploader() {
               </a>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             {step === "select" ? (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
@@ -221,170 +218,50 @@ export default function VideoUploader() {
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id="excel"
+                          id="github"
                           name="source"
-                          value="excel"
-                          checked={source.type === "excel"}
+                          value="github"
+                          checked={source.type === "github"}
                           onChange={() => {
                             setSource({
-                              type: "excel",
+                              type: "github",
                               example: exampleResponse1Json as ApiResponse,
                             });
                             setFile(null);
                             setResponse(null);
+                            setExampleVideoUrl("/videos/example-ouput-LI.mp4");
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="excel" className="text-base">
-                          Sample 1: User session with{" "}
-                          <PiMicrosoftExcelLogo className="w-5 h-5 inline-block" />{" "}
-                          spreadsheet
+                        <Label htmlFor="github" className="text-base">
+                          Sample 1: GitHub repository{" "}
+                          <FaGithub className="w-5 h-5 inline-block" />{" "}
+                          navigation
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id="powerpoint"
+                          id="linkedin"
                           name="source"
-                          value="powerpoint"
-                          checked={source.type === "powerpoint"}
+                          value="LinkedIn"
+                          checked={source.type === "linkedin"}
                           onChange={() => {
                             setSource({
-                              type: "powerpoint",
+                              type: "linkedin",
                               example: exampleResponse2Json as ApiResponse,
                             });
                             setFile(null);
                             setResponse(null);
+                            setExampleVideoUrl("/videos/example-output-github.mp4");
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="powerpoint" className="text-base">
-                          Sample 2: User session with{" "}
-                          <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block" />{" "}
-                          slide
+                        <Label htmlFor="linkedin" className="text-base">
+                          Sample 2: LinkedIn profile{" "}
+                          <FaLinkedin className="w-5 h-5 inline-block" />{" "}
+                          browsing
                         </Label>
-                      </div>
-                      {source.type === "powerpoint" ? (
-                        <>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Selected: Sample PowerPoint Video
-                          </p>
-                          <div className="flex-1 min-h-0">
-                            <h4 className="text-sm font-medium mb-2">
-                              Preview:
-                            </h4>
-                            <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
-                              <video
-                                controls
-                                className="absolute inset-0 w-full h-full object-contain"
-                                src={examplevideo}
-                                onError={(e) => {
-                                  const video = e.target as HTMLVideoElement;
-                                  video.style.display = "none";
-                                  const errorMessage =
-                                    document.createElement("div");
-                                  errorMessage.className =
-                                    "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                                  errorMessage.textContent =
-                                    "Video cannot be played. Please try a different format.";
-                                  video.parentElement?.appendChild(
-                                    errorMessage
-                                  );
-                                }}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          </div>
-                        </>
-                      ) : file ? (
-                        <>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Selected: {file.name} (
-                            {(file.size / (1024 * 1024)).toFixed(2)} MB)
-                          </p>
-                          <div className="flex-1 min-h-0">
-                            <h4 className="text-sm font-medium mb-2">
-                              Preview:
-                            </h4>
-                            <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
-                              <video
-                                controls
-                                className="absolute inset-0 w-full h-full object-contain"
-                                src={URL.createObjectURL(file)}
-                                onError={(e) => {
-                                  const video = e.target as HTMLVideoElement;
-                                  video.style.display = "none";
-                                  const errorMessage =
-                                    document.createElement("div");
-                                  errorMessage.className =
-                                    "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                                  errorMessage.textContent =
-                                    "Video cannot be played. Please try a different format.";
-                                  video.parentElement?.appendChild(
-                                    errorMessage
-                                  );
-                                }}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="h-full flex items-center justify-center text-muted-foreground">
-                          <p>
-                            No video selected. Please choose a video file to
-                            preview.
-                          </p>
-                        </div>
-                      )}
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="upload"
-                          name="source"
-                          value="upload"
-                          checked={source.type === "upload"}
-                          onChange={() => {
-                            setSource({ type: "upload", example: null });
-                            setFile(null);
-                            setResponse(null);
-                          }}
-                          className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                        />
-                        <Label htmlFor="upload" className="text-base">
-                          Upload video
-                        </Label>
-                        {source.type === "upload" && (
-                          <div className="flex items-center gap-2">
-                            {/* <Label htmlFor="video" className="text-sm">
-                              Select MP4 Video
-                            </Label> */}
-                            <Input
-                              id="video"
-                              type="file"
-                              accept="video/mp4"
-                              onChange={handleFileChange}
-                              className="flex-1 p-0 h-15"
-                            />
-                            <p className="text-sm text-muted-foreground">
-                              MP4 max size: 50MB
-                            </p>
-                            {file && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  setFile(null);
-                                  setError(null);
-                                }}
-                              >
-                                Clear
-                              </Button>
-                            )}
-                          </div>
-                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
@@ -408,6 +285,32 @@ export default function VideoUploader() {
                     </div>
                   </div>
 
+                  {(file || exampleVideoUrl) && (
+                    <div className="flex-1 bg-muted rounded-md overflow-hidden">
+                      <div className="h-[300px] flex flex-col">
+                        <div className="flex-1 p-4">
+                          <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                            <video
+                              controls
+                              className="absolute inset-0 w-full h-full object-contain"
+                              src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                              onError={(e) => {
+                                const video = e.target as HTMLVideoElement;
+                                video.style.display = "none";
+                                const errorMessage = document.createElement("div");
+                                errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                                video.parentElement?.appendChild(errorMessage);
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {source.type === "screen" && (
                     <ScreenRecorder
                       onFileRecorded={handleRecordedFile}
@@ -418,67 +321,34 @@ export default function VideoUploader() {
                 <Button
                   type="button"
                   onClick={() => setStep("process")}
-                  disabled={source.type === "upload" && !file}
+                  disabled={source.type === "screen" && !file}
                 >
                   Submit Capture
                 </Button>
               </form>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-md">
-                  <h3 className="font-medium mb-2">Selected Source:</h3>
-                  {source.type === "excel" && (
-                    <p>Sample 1: Excel Spreadsheet Session</p>
-                  )}
-                  {source.type === "powerpoint" && (
-                    <p>Sample 2: PowerPoint Slide Session</p>
-                  )}
-                  {source.type === "upload" && file && (
-                    <p>Uploaded File: {file.name}</p>
-                  )}
-                  {source.type === "screen" && <p>Screen Recording</p>}
-                </div>
-
-                <div className="p-4 bg-muted rounded-md h-[300px] overflow-hidden">
+              <div className="space-y-4 h-full flex flex-col">
+                <div className="flex-1 bg-muted rounded-md overflow-hidden">
                   <div className="h-full flex flex-col">
-                    {file ? (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Selected: {file.name} (
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB)
-                        </p>
-                        <div className="flex-1 min-h-0">
-                          <h4 className="text-sm font-medium mb-2">Preview:</h4>
-                          <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
-                            <video
-                              controls
-                              className="absolute inset-0 w-full h-full object-contain"
-                              src={URL.createObjectURL(file)}
-                              onError={(e) => {
-                                const video = e.target as HTMLVideoElement;
-                                video.style.display = "none";
-                                const errorMessage =
-                                  document.createElement("div");
-                                errorMessage.className =
-                                  "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                                errorMessage.textContent =
-                                  "Video cannot be played. Please try a different format.";
-                                video.parentElement?.appendChild(errorMessage);
-                              }}
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-muted-foreground">
-                        <p>
-                          No video selected. Please choose a video file to
-                          preview.
-                        </p>
+                    <div className="flex-1 p-4">
+                      <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                        <video
+                          controls
+                          className="absolute inset-0 w-full h-full object-contain"
+                          src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                          onError={(e) => {
+                            const video = e.target as HTMLVideoElement;
+                            video.style.display = "none";
+                            const errorMessage = document.createElement("div");
+                            errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                            errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                            video.parentElement?.appendChild(errorMessage);
+                          }}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
                 <Button
