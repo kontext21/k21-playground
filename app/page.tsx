@@ -42,7 +42,7 @@ interface ApiResponse {
 }
 
 type VideoSource = {
-  type: "excel" | "powerpoint" | "screen" | "upload";
+  type: "github" | "linkedin" | "screen";
   example?: ApiResponse | null;
 };
 
@@ -57,7 +57,7 @@ export default function VideoUploader() {
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
   const [showHeader, setShowHeader] = useState(false);
   const [source, setSource] = useState<VideoSource>({
-    type: "excel",
+    type: "github",
     example: exampleResponse1Json as ApiResponse,
   });
   const [step, setStep] = useState<"select" | "process" | "consume">("select");
@@ -150,26 +150,16 @@ export default function VideoUploader() {
     setIsProcessing(true);
     setResponse(null);
     try {
-      // Simulate processing delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       if (source.example) {
-        // If we have an example, use that as the response
         setResponse(source.example);
+        setStep("process");
       } else if (source.type === "screen" && videoBase64) {
-        // For screen recordings, use the base64 data if available
         const result = await uploadBase64(videoBase64);
         setResponse(result);
-      } else if (file) {
-        // Handle file upload and processing
-        const formData = new FormData();
-        formData.append("video", file);
-
-        const result = await uploadVideo(formData);
-        setResponse(result);
-        setStep("consume");
+        setStep("process");
       } else {
-        // If no file and no example, show error
         setError("No content to process");
         return;
       }
@@ -225,13 +215,13 @@ export default function VideoUploader() {
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id="excel"
+                          id="github"
                           name="source"
                           value="github"
-                          checked={source.type === "excel"}
+                          checked={source.type === "github"}
                           onChange={() => {
                             setSource({
-                              type: "excel",
+                              type: "github",
                               example: exampleResponse1Json as ApiResponse,
                             });
                             setFile(null);
@@ -240,7 +230,7 @@ export default function VideoUploader() {
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="excel" className="text-base">
+                        <Label htmlFor="github" className="text-base">
                           Sample 1: GitHub repository{" "}
                           <FaGithub className="w-5 h-5 inline-block" />{" "}
                           navigation
@@ -249,13 +239,13 @@ export default function VideoUploader() {
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id="powerpoint"
+                          id="linkedin"
                           name="source"
                           value="LinkedIn"
-                          checked={source.type === "powerpoint"}
+                          checked={source.type === "linkedin"}
                           onChange={() => {
                             setSource({
-                              type: "powerpoint",
+                              type: "linkedin",
                               example: exampleResponse2Json as ApiResponse,
                             });
                             setFile(null);
@@ -264,59 +254,11 @@ export default function VideoUploader() {
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
-                        <Label htmlFor="powerpoint" className="text-base">
+                        <Label htmlFor="linkedin" className="text-base">
                           Sample 2: LinkedIn profile{" "}
                           <FaLinkedin className="w-5 h-5 inline-block" />{" "}
                           browsing
                         </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="upload"
-                          name="source"
-                          value="upload"
-                          checked={source.type === "upload"}
-                          onChange={() => {
-                            setSource({ type: "upload", example: null });
-                            setFile(null);
-                            setResponse(null);
-                            setExampleVideoUrl(null);
-                          }}
-                          className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-                        />
-                        <Label htmlFor="upload" className="text-base">
-                          Upload video
-                        </Label>
-                        {source.type === "upload" && (
-                          <div className="flex items-center gap-2">
-                            {/* <Label htmlFor="video" className="text-sm">
-                              Select MP4 Video
-                            </Label> */}
-                            <Input
-                              id="video"
-                              type="file"
-                              accept="video/mp4"
-                              onChange={handleFileChange}
-                              className="flex-1 p-0 h-5"
-                            />
-                            <p className="text-sm text-muted-foreground">
-                              MP4 max size: 50MB
-                            </p>
-                            {file && (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => {
-                                  setFile(null);
-                                  setError(null);
-                                }}
-                              >
-                                Clear
-                              </Button>
-                            )}
-                          </div>
-                        )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <input
@@ -375,7 +317,7 @@ export default function VideoUploader() {
                 <Button
                   type="button"
                   onClick={() => setStep("process")}
-                  disabled={source.type === "upload" && !file}
+                  disabled={source.type === "screen" && !file}
                 >
                   Submit Capture
                 </Button>
