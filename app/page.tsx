@@ -7,10 +7,6 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import {
-  PiMicrosoftExcelLogo,
-  PiMicrosoftPowerpointLogo,
-} from "react-icons/pi";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -28,9 +24,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import exampleResponse1Json from "@/test/example-ouput-small.json";
-import exampleResponse2Json from "@/test/example-output-mid.json";
+import exampleResponse1Json from "@/test/example-ouput-LI.json";
+import exampleResponse2Json from "@/test/example-output-github.json";
 import ScreenRecorder from "@/components/ScreenRecorder";
+import { filterText } from "@/lib/utils";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 interface ApiResponse {
   base64_data?: string;
@@ -63,6 +61,7 @@ export default function VideoUploader() {
     example: exampleResponse1Json as ApiResponse,
   });
   const [step, setStep] = useState<"select" | "process" | "consume">("select");
+  const [exampleVideoUrl, setExampleVideoUrl] = useState<string | null>(null);
 
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
@@ -78,6 +77,11 @@ export default function VideoUploader() {
     }
   }, []);
 
+  useEffect(() => {
+    // Set the example video URL for the first sample on mount
+    setExampleVideoUrl("/videos/example-ouput-LI.mp4");
+  }, []); // Empty dependency array means this runs once on mount
+
   const calculateWordFrequencies = () => {
     if (!response?.result) return;
 
@@ -88,13 +92,17 @@ export default function VideoUploader() {
       .toLowerCase();
 
     const words = allText.match(/\b\w+\b/g) || [];
+    const filteredWords = words.filter(word => {
+      const filteredWord = filterText(word);
+      return filteredWord.length > 0;
+    }).map(word => word.toLowerCase());
 
     // Count word frequencies
-    const frequencies = words.reduce((acc: { [key: string]: number }, word) => {
+    const frequencies = filteredWords.reduce((acc: { [key: string]: number }, word) => {
       acc[word] = (acc[word] || 0) + 1;
       return acc;
     }, {});
-
+ 
     // Convert to array and sort by frequency
     const sortedFrequencies = Object.entries(frequencies)
       .sort(([, a], [, b]) => b - a)
@@ -194,8 +202,8 @@ export default function VideoUploader() {
     <div ref={appRef} className="container max-w-full px-4 py-10">
       {showHeader && <Header />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
-        <Card className="min-h-[600px]">
-          <CardHeader>
+        <Card className="min-h-[600px] flex flex-col">
+          <CardHeader className="flex-shrink-0">
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription>
               Context needs to be captured from the users screen first. Below
@@ -205,7 +213,7 @@ export default function VideoUploader() {
               </a>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             {step === "select" ? (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
@@ -219,7 +227,7 @@ export default function VideoUploader() {
                           type="radio"
                           id="excel"
                           name="source"
-                          value="excel"
+                          value="github"
                           checked={source.type === "excel"}
                           onChange={() => {
                             setSource({
@@ -228,13 +236,14 @@ export default function VideoUploader() {
                             });
                             setFile(null);
                             setResponse(null);
+                            setExampleVideoUrl("/videos/example-ouput-LI.mp4");
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="excel" className="text-base">
-                          Sample 1: User session with{" "}
-                          <PiMicrosoftExcelLogo className="w-5 h-5 inline-block" />{" "}
-                          spreadsheet
+                          Sample 1: GitHub repository{" "}
+                          <FaGithub className="w-5 h-5 inline-block" />{" "}
+                          navigation
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -242,7 +251,7 @@ export default function VideoUploader() {
                           type="radio"
                           id="powerpoint"
                           name="source"
-                          value="powerpoint"
+                          value="LinkedIn"
                           checked={source.type === "powerpoint"}
                           onChange={() => {
                             setSource({
@@ -251,13 +260,14 @@ export default function VideoUploader() {
                             });
                             setFile(null);
                             setResponse(null);
+                            setExampleVideoUrl("/videos/example-output-github.mp4");
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
                         <Label htmlFor="powerpoint" className="text-base">
-                          Sample 2: User session with{" "}
-                          <PiMicrosoftPowerpointLogo className="w-5 h-5 inline-block" />{" "}
-                          slide
+                          Sample 2: LinkedIn profile{" "}
+                          <FaLinkedin className="w-5 h-5 inline-block" />{" "}
+                          browsing
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -271,6 +281,7 @@ export default function VideoUploader() {
                             setSource({ type: "upload", example: null });
                             setFile(null);
                             setResponse(null);
+                            setExampleVideoUrl(null);
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
@@ -328,6 +339,32 @@ export default function VideoUploader() {
                     </div>
                   </div>
 
+                  {(file || exampleVideoUrl) && (
+                    <div className="flex-1 bg-muted rounded-md overflow-hidden">
+                      <div className="h-[300px] flex flex-col">
+                        <div className="flex-1 p-4">
+                          <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                            <video
+                              controls
+                              className="absolute inset-0 w-full h-full object-contain"
+                              src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                              onError={(e) => {
+                                const video = e.target as HTMLVideoElement;
+                                video.style.display = "none";
+                                const errorMessage = document.createElement("div");
+                                errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                                video.parentElement?.appendChild(errorMessage);
+                              }}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {source.type === "screen" && (
                     <ScreenRecorder
                       onFileRecorded={handleRecordedFile}
@@ -344,61 +381,28 @@ export default function VideoUploader() {
                 </Button>
               </form>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-md">
-                  <h3 className="font-medium mb-2">Selected Source:</h3>
-                  {source.type === "excel" && (
-                    <p>Sample 1: Excel Spreadsheet Session</p>
-                  )}
-                  {source.type === "powerpoint" && (
-                    <p>Sample 2: PowerPoint Slide Session</p>
-                  )}
-                  {source.type === "upload" && file && (
-                    <p>Uploaded File: {file.name}</p>
-                  )}
-                  {source.type === "screen" && <p>Screen Recording</p>}
-                </div>
-
-                <div className="p-4 bg-muted rounded-md h-[300px] overflow-hidden">
+              <div className="space-y-4 h-full flex flex-col">
+                <div className="flex-1 bg-muted rounded-md overflow-hidden">
                   <div className="h-full flex flex-col">
-                    {file ? (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          Selected: {file.name} (
-                          {(file.size / (1024 * 1024)).toFixed(2)} MB)
-                        </p>
-                        <div className="flex-1 min-h-0">
-                          <h4 className="text-sm font-medium mb-2">Preview:</h4>
-                          <div className="relative w-full h-[calc(100%-2rem)] bg-muted rounded-md overflow-hidden">
-                            <video
-                              controls
-                              className="absolute inset-0 w-full h-full object-contain"
-                              src={URL.createObjectURL(file)}
-                              onError={(e) => {
-                                const video = e.target as HTMLVideoElement;
-                                video.style.display = "none";
-                                const errorMessage =
-                                  document.createElement("div");
-                                errorMessage.className =
-                                  "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                                errorMessage.textContent =
-                                  "Video cannot be played. Please try a different format.";
-                                video.parentElement?.appendChild(errorMessage);
-                              }}
-                            >
-                              Your browser does not support the video tag.
-                            </video>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-muted-foreground">
-                        <p>
-                          No video selected. Please choose a video file to
-                          preview.
-                        </p>
+                    <div className="flex-1 p-4">
+                      <div className="relative w-full h-full bg-black rounded-md overflow-hidden">
+                        <video
+                          controls
+                          className="absolute inset-0 w-full h-full object-contain"
+                          src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                          onError={(e) => {
+                            const video = e.target as HTMLVideoElement;
+                            video.style.display = "none";
+                            const errorMessage = document.createElement("div");
+                            errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                            errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                            video.parentElement?.appendChild(errorMessage);
+                          }}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
                 <Button

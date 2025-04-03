@@ -24,7 +24,6 @@ export async function uploadVideo(formData: FormData) {
 
 export async function uploadBase64(base64Data: string) {
   try {
-    console.log("Uploading base64 data:", base64Data)
     const response = await fetch("https://k21-server-468449125003.europe-west10.run.app/process-video-base64", {
       method: "POST",
       headers: {
@@ -43,6 +42,7 @@ export async function uploadBase64(base64Data: string) {
     }
 
     const data = await response.json()
+    console.log("Uploaded video:", data)
     revalidatePath("/")
     return data
   } catch (error) {
