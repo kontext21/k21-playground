@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { uploadVideo, uploadBase64 } from "@/app/actions";
 import {
@@ -111,18 +111,18 @@ export default function VideoUploader() {
     setWordFrequencies(sortedFrequencies);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (selectedFile.type !== "video/mp4") {
-        setError("Please select an MP4 file");
-        setFile(null);
-        return;
-      }
-      setFile(selectedFile);
-      setError(null);
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     const selectedFile = e.target.files[0];
+  //     if (selectedFile.type !== "video/mp4") {
+  //       setError("Please select an MP4 file");
+  //       setFile(null);
+  //       return;
+  //     }
+  //     setFile(selectedFile);
+  //     setError(null);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
