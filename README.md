@@ -1,6 +1,6 @@
 # Kontext21 Playground  
 
-It's a simple Next.js app that allows you to:
+Is a simple Next.js app making use of the [k21 SDK](https://github.com/kontext21/k21) that allows you to:
 
 1. Upload a user screen session (recorded as MP4)  
 2. Send it to the k21-processor in the cloud
@@ -12,7 +12,7 @@ It's hosted at [playground.kontext21.com/](https://playground.kontext21.com/) or
 
 It's main purpose is to be used for quick experiments with the k21-processor and serve as a sample app.
 
-![image](https://github.com/user-attachments/assets/8b13db47-a71d-48a4-92bc-2c98e052c767)
+![image](https://github.com/user-attachments/assets/d378b160-9551-4143-a860-89e1d7769bab)
 
 ## Features planned
 
