@@ -196,8 +196,8 @@ export default function VideoUploader() {
           <CardHeader className="flex-shrink-0">
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription className="text-base">
-              Context needs to be captured from the users screen first. Below
-              are several sample screen captures.{" "}
+              <p className="text-primary">Context needs to be captured from the users screen first. Below
+              are several sample screen captures.</p>{" "}
               <a
                 href="https://docs.kontext21.com/concepts/capture"
                 className="text-primary hover:underline"
@@ -383,12 +383,12 @@ export default function VideoUploader() {
                   : "text-base"
               }
             >
-              Extracts text from the screen capture frames. Now that you&apos;ve
+              <p >Extracts text from the screen capture frames. Now that you&apos;ve
               selected a source for your context, run it through K21 cloud
-              processor to analyze it and extract OCR data.{" "}
+              processor to analyze it and extract OCR data.</p>{" "}
               <a
                 href="https://kontext21.com/docs/processing"
-                className="text-primary hover:underline"
+                className="hover:underline"
               >
                 Learn more about processing.
               </a>
@@ -454,19 +454,19 @@ export default function VideoUploader() {
               }
             >
               <div className="flex flex-col">
-                <p className="mb-5">
+                <p className="mb-2">
                   Great! You&apos;ve gathered some data, but making sense of it
                   can be challenging. Let&apos;s dive deeper, analyze it, and
                   uncover powerful, actionable insights!{" "}
                   <a
                     href="https://kontext21.com"
-                    className="text-primary hover:underline"
+                    className="hover:underline"
                   >
                     Check out some Use Cases!
                   </a>
                 </p>
                 {response && (
-                  <div className="mb-4">
+                  <div>
                     <Button
                       onClick={calculateWordFrequencies}
                       disabled={!response?.result}

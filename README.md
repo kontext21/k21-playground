@@ -37,4 +37,20 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This is a [Next.js](https://nextjs.org) project.
+This is a [Next.js](https://nextjs.org) project integrated with [PostHog](https://posthog.com/) for event-based analytics. 
+
+## Analytics
+
+PostHog enables tracking of user interactions, page views, and custom events while ensuring privacy and GDPR compliance.
+
+The integration can be made through an LLM(Large Language Model) or manualy.
+
+To integrate through LLM like Cursor or Bolt, run the following prompt in the chat:  
+
+>Let's add PostHog to this project. We'll use the PostHog wizard to ensure the integration is handled correctly. Use this command:
+>
+>npx --yes @posthog/wizard@latest --default --region us
+>
+>Do not generate any file changes yourself. This CLI command will do all the work. Wait for it to finish and test the setup once the wizard is complete.
+
+If you prefer manual integration, the full documentation can be found in [PostHog manual Next.js Documentation](https://posthog.com/docs/libraries/next-js).
