@@ -5,7 +5,6 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
 import {
   Card,
   CardContent,
@@ -29,6 +28,7 @@ import exampleResponse2Json from "@/test/example-output-github.json";
 import ScreenRecorder from "@/components/ScreenRecorder";
 import { filterText } from "@/lib/utils";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
+import dynamic from "next/dynamic";
 
 interface ApiResponse {
   base64_data?: string;
@@ -46,6 +46,21 @@ type VideoSource = {
   example?: ApiResponse | null;
 };
 
+const DynamicHeader = dynamic(() => import("@/components/Header"), {
+  ssr: true,
+  loading: () => (
+    <header className="py-2">
+      <div className="container flex flex-col mb-10">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-[90px] h-[30px] bg-muted animate-pulse rounded" />
+          <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+        </div>
+        <div className="h-6 w-full bg-muted animate-pulse rounded" />
+      </div>
+    </header>
+  ),
+});
+
 export default function VideoUploader() {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -55,25 +70,24 @@ export default function VideoUploader() {
     [string, number][] | null
   >(null);
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
-  const [showHeader, setShowHeader] = useState(false);
+  
   const [source, setSource] = useState<VideoSource>({
     type: "github",
     example: exampleResponse1Json as ApiResponse,
   });
   const [step, setStep] = useState<"select" | "process" | "consume">("select");
   const [exampleVideoUrl, setExampleVideoUrl] = useState<string | null>(null);
+  const [isInIframe, setIsInIframe] = useState(false);
 
   // Ref to the element you want to record
   const appRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check if we're in an iframe
     try {
-      const isInIframe = window.self !== window.top;
-      setShowHeader(!isInIframe);
+      setIsInIframe(window.self !== window.top);
     } catch (e) {
-      console.log("Error checking if in iframe", e);
-      // If we can't access window.top, we're in an iframe
-      setShowHeader(false);
+      setIsInIframe(true);
     }
   }, []);
 
@@ -92,17 +106,22 @@ export default function VideoUploader() {
       .toLowerCase();
 
     const words = allText.match(/\b\w+\b/g) || [];
-    const filteredWords = words.filter(word => {
-      const filteredWord = filterText(word);
-      return filteredWord.length > 0;
-    }).map(word => word.toLowerCase());
+    const filteredWords = words
+      .filter((word) => {
+        const filteredWord = filterText(word);
+        return filteredWord.length > 0;
+      })
+      .map((word) => word.toLowerCase());
 
     // Count word frequencies
-    const frequencies = filteredWords.reduce((acc: { [key: string]: number }, word) => {
-      acc[word] = (acc[word] || 0) + 1;
-      return acc;
-    }, {});
- 
+    const frequencies = filteredWords.reduce(
+      (acc: { [key: string]: number }, word) => {
+        acc[word] = (acc[word] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
+
     // Convert to array and sort by frequency
     const sortedFrequencies = Object.entries(frequencies)
       .sort(([, a], [, b]) => b - a)
@@ -189,15 +208,17 @@ export default function VideoUploader() {
   };
 
   return (
-    <div ref={appRef} className="container max-w-full px-4 py-10">
-      {showHeader && <Header />}
+    <div ref={appRef} className="container max-w-full px-4 py-2">
+      {!isInIframe && <DynamicHeader />}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto">
         <Card className="min-h-[600px] flex flex-col">
           <CardHeader className="flex-shrink-0">
             <CardTitle className="text-2xl">Capture</CardTitle>
             <CardDescription className="text-base">
-              <p className="text-primary">Context needs to be captured from the users screen first. Below
-              are several sample screen captures.</p>{" "}
+              <p className="text-primary">
+                Context needs to be captured from the users screen first. Below
+                are several sample screen captures.
+              </p>{" "}
               <a
                 href="https://docs.kontext21.com/concepts/capture"
                 className="text-primary hover:underline"
@@ -214,7 +235,7 @@ export default function VideoUploader() {
                     <Label htmlFor="preset" className="text-base mb-2 block">
                       Choose a sample source:
                     </Label>
-                    <div className="h-[150px] space-y-2">
+                    <div className="h-[100px] space-y-2">
                       <div className="flex items-center space-x-2">
                         <input
                           type="radio"
@@ -253,7 +274,9 @@ export default function VideoUploader() {
                             });
                             setFile(null);
                             setResponse(null);
-                            setExampleVideoUrl("/videos/example-output-github.mp4");
+                            setExampleVideoUrl(
+                              "/videos/example-output-github.mp4"
+                            );
                           }}
                           className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
                         />
@@ -293,13 +316,20 @@ export default function VideoUploader() {
                             <video
                               controls
                               className="absolute inset-0 w-full h-full object-contain"
-                              src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                              src={
+                                file
+                                  ? URL.createObjectURL(file)
+                                  : exampleVideoUrl || undefined
+                              }
                               onError={(e) => {
                                 const video = e.target as HTMLVideoElement;
                                 video.style.display = "none";
-                                const errorMessage = document.createElement("div");
-                                errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                                errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                                const errorMessage =
+                                  document.createElement("div");
+                                errorMessage.className =
+                                  "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                                errorMessage.textContent =
+                                  "Video cannot be played. Please try a different format.";
                                 video.parentElement?.appendChild(errorMessage);
                               }}
                             >
@@ -335,13 +365,19 @@ export default function VideoUploader() {
                         <video
                           controls
                           className="absolute inset-0 w-full h-full object-contain"
-                          src={file ? URL.createObjectURL(file) : exampleVideoUrl || undefined}
+                          src={
+                            file
+                              ? URL.createObjectURL(file)
+                              : exampleVideoUrl || undefined
+                          }
                           onError={(e) => {
                             const video = e.target as HTMLVideoElement;
                             video.style.display = "none";
                             const errorMessage = document.createElement("div");
-                            errorMessage.className = "absolute inset-0 flex items-center justify-center text-muted-foreground";
-                            errorMessage.textContent = "Video cannot be played. Please try a different format.";
+                            errorMessage.className =
+                              "absolute inset-0 flex items-center justify-center text-muted-foreground";
+                            errorMessage.textContent =
+                              "Video cannot be played. Please try a different format.";
                             video.parentElement?.appendChild(errorMessage);
                           }}
                         >
@@ -383,9 +419,11 @@ export default function VideoUploader() {
                   : "text-base"
               }
             >
-              <p >Extracts text from the screen capture frames. Now that you&apos;ve
-              selected a source for your context, run it through K21 cloud
-              processor to analyze it and extract OCR data.</p>{" "}
+              <p>
+                Extracts text from the screen capture frames. Now that
+                you&apos;ve selected a source for your context, run it through
+                K21 cloud processor to analyze it and extract OCR data.
+              </p>{" "}
               <a
                 href="https://kontext21.com/docs/processing"
                 className="hover:underline"
@@ -458,10 +496,7 @@ export default function VideoUploader() {
                   Great! You&apos;ve gathered some data, but making sense of it
                   can be challenging. Let&apos;s dive deeper, analyze it, and
                   uncover powerful, actionable insights!{" "}
-                  <a
-                    href="https://kontext21.com"
-                    className="hover:underline"
-                  >
+                  <a href="https://kontext21.com" className="hover:underline">
                     Check out some Use Cases!
                   </a>
                 </p>
