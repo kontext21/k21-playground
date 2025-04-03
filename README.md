@@ -6,7 +6,7 @@ Is a simple Next.js app making use of the [k21 SDK](https://github.com/kontext21
 2. Send it to the k21-processor in the cloud
 3. Display JSON response.
 
-On K21 users can either upload a pre-recorded MP4 file or initiate a live screen capture. This input is then sent to the backend, which processes the received file and uploads it to a Rust-based cloud processing service. Once the processing is complete, the service returns a JSON response, which is then displayed to the user.
+On K21 users can either upuse one of the provided samples or initiate a live screen capture. This input is then sent to the backend, which processes the received file and uploads it to a Rust-based cloud processing service. Once the processing is complete, the service returns a JSON response, which is then displayed to the user.
 
 It's hosted at [playground.kontext21.com/](https://playground.kontext21.com/) or you can run it locally.
 

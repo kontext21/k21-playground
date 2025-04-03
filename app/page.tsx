@@ -547,7 +547,7 @@ export default function VideoUploader() {
         <Button variant="outline">
           <a href="https://kontext21.com/contact">Contact Us</a>
         </Button>
-        <Button variant="outline">
+        <Button variant="default">
           <a href="https://docs.kontext21.com/quickstart">
             Try to build your own
           </a>
