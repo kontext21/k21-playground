@@ -59,6 +59,7 @@ function PostHogPageView() {
       }
       // Send pageview event to PostHog with the current URL
       posthog.capture("$pageview", { $current_url: url });
+      
     }
   }, [pathname, searchParams, posthog]);
 
