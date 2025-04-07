@@ -70,7 +70,7 @@ export default function VideoUploader() {
     [string, number][] | null
   >(null);
   const [videoBase64, setVideoBase64] = useState<string | null>(null);
-  
+
   const [source, setSource] = useState<VideoSource>({
     type: "github",
     example: exampleResponse1Json as ApiResponse,
@@ -87,7 +87,7 @@ export default function VideoUploader() {
     try {
       setIsInIframe(window.self !== window.top);
     } catch (e) {
-      console.log(`Failed to check for iframe`, e)
+      console.log(`Failed to check for iframe`, e);
       setIsInIframe(true);
     }
   }, []);
@@ -584,7 +584,11 @@ export default function VideoUploader() {
           <a href="https://kontext21.com/contact">Contact Us</a>
         </Button>
         <Button variant="default">
-          <a href="https://docs.kontext21.com/quickstart">
+          <a
+            href="https://docs.kontext21.com/quickstart"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Try to build your own
           </a>
         </Button>
